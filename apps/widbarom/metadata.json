@@ -8,6 +8,6 @@
   "tags": "widget",
   "supports": ["BANGLEJS","BANGLEJS2"],
   "storage": [
-    {"name":"widbarom.wid.js","url":"widget.js"},
+    {"name":"widbarom.wid.js","url":"widget.js"}
   ]
 }
