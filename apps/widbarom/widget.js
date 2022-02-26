@@ -24,9 +24,6 @@
     return currentPressure();
   }
 
-  function getLast(){
-    return lastPressure;
-  }
   function getChange(){
     dt=(currentPressure.time-lastPressure.time)/(1000*60*60);
     dp=currentPressure.pressure-lastPressure.pressure;
@@ -34,15 +31,16 @@
   }
   
   setInterval(function() {
-    WIDGETS["widdate"].updateData(WIDGETS["widdate"]);
+    WIDGETS["widbarom"].updateData(WIDGETS["widbarom"]);
   }, 1*6000); // update every 0.1 minutes
 
   // add your widget
-  WIDGETS["widdate"]={
+  WIDGETS["widbarom"]={
     area:"tl", // tl (top left), tr (top right), bl (bottom left), br (bottom right)
     width: width, // how wide is the widget? You can change this and call Bangle.drawWidgets() to re-layout
     draw:draw, // called to draw the widget
     updateData:updateData,
-    getChange:getChange
+    getChange:getChange,
+    getCurrent:getCurrent
   };
 })()
