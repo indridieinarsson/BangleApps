@@ -20,8 +20,8 @@
     Bangle.getPressure().then(baroHandler);
   }
 
-  function getCurrent(){
-    return currentPressure();
+  function getLastPressure(){
+    return currentPressure.pressure;
   }
 
   function getChange(){
@@ -41,6 +41,6 @@
     draw:draw, // called to draw the widget
     updateData:updateData,
     getChange:getChange,
-    getCurrent:getCurrent
+    getLastPressure: getLastPressure
   };
 })()
