@@ -1,0 +1,13 @@
+{
+  "id": "widbarom",
+  "name": "Barometer widget",
+  "version": "0.01",
+  "description": "Barometer widget",
+  "icon": "widget.png",
+  "type": "widget",
+  "tags": "widget",
+  "supports": ["BANGLEJS","BANGLEJS2"],
+  "storage": [
+    {"name":"widbarom.wid.js","url":"widget.js"},
+  ]
+}
