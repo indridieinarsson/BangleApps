@@ -21,7 +21,7 @@
   }
 
   function getCurrent(){
-    return currentPressure();
+    return currentPressure;
   }
 
   function getChange(){
@@ -32,7 +32,7 @@
   
   setInterval(function() {
     WIDGETS["widbarom"].updateData(WIDGETS["widbarom"]);
-  }, 1*6000); // update every 0.1 minutes
+  }, 60*60000); // update every 0.1 minutes
 
   // add your widget
   WIDGETS["widbarom"]={
