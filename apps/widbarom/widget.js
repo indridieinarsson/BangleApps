@@ -9,8 +9,14 @@
   function updateData() {
     function baroHandler(data) {
       if (data===undefined) // workaround for https://github.com/espruino/BangleApps/issues/1429
+	console.log("undefined barometer data")
         setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
+      else if (data.pressure==0){
+	console.log("barometer data 0")
+        setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
+      }
       else {
+	console.log("got barometer data " + data.pressure)
         lastPressure = currentPressure;
         currentPressure={'time':Date().getTime(), 'pressure':  data.pressure};
         Bangle.setBarometerPower(false);
@@ -25,14 +31,14 @@
   }
 
   function getChange(){
-    dt=(currentPressure.time-lastPressure.time)/(1000*60*60);
+    dt=(currentPressure.time-lastPressure.time)/(1000*60*60.0);
     dp=currentPressure.pressure-lastPressure.pressure;
     return dp/dt;
   }
   
   setInterval(function() {
     WIDGETS["widbarom"].updateData(WIDGETS["widbarom"]);
-  }, 60*60000); // update every 0.1 minutes
+  }, 5*1000); // update every 0.1 minutes
 
   // add your widget
   WIDGETS["widbarom"]={
