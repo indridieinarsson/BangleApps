@@ -1,4 +1,4 @@
-WIDGETS = {}; // <-- for development only
+// WIDGETS = {}; // <-- for development only
 (() => {
   var width = 0; // width of the widget
     var currentPressure={'time':Date().getTime(), 'pressure':0};
