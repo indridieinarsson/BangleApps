@@ -1,0 +1,13 @@
+{
+  "id": "widsuntides",
+  "name": "Sun and tidal widget",
+  "version": "0.01",
+  "description": "Background widget to provde sunrise, sunset and tidal info",
+  "icon": "widget.png",
+  "type": "widget",
+  "tags": "widget",
+  "supports": ["BANGLEJS","BANGLEJS2"],
+  "storage": [
+    {"name":"widsuntides.wid.js","url":"widget.js"}
+  ]
+}
