@@ -1,6 +1,6 @@
 // WIDGETS = {}; // <-- for development only
 (() => {
-    if (typeof widbarominit == 'undefined') {
+    if (typeof WIDGETS.widbarom == 'undefined') {
         console.log("widbarom not initialized - initializing");
         var width = 0; // width of the widget
         var buflen = 200;
@@ -12,7 +12,8 @@
         var intervalId=-1;
         var widbarominit=true;
     } else {
-        console.log("widbarom already initialized - do nothing");   
+        console.log("widbarom already initialized - do nothing");
+        return;
     }
     
     function draw() {
