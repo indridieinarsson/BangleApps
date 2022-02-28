@@ -11,6 +11,7 @@ baro.draw = function draw(x,y,Radius, Settings) {
   g.setFontAlign(0,0);
   dp = Math.round(WIDGETS.widbarom.getChange() * 10) / 10;
   Text = ''+dp+"Hp";
+  g.drawString(Text, x,y);
 };
 
 require('https://raw.githubusercontent.com/rozek/banglejs-2-widgets-on-background/main/drawWidgets.js');
