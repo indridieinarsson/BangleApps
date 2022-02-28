@@ -10,7 +10,9 @@ baro.draw = function draw(x,y,Radius, Settings) {
   g.setFont('Vector', 18);
   g.setFontAlign(0,0);
   dp = Math.round(WIDGETS.widbarom.getChange() * 10) / 10;
-  Text = ''+dp+"Hp";
+  p = Math.round(WIDGETS.widbarom.getLastPressure().pressure);
+    dpsign = (dp<0?"-":"+") + dp;
+  Text = ''+p+dpsign+"Hp";
   g.drawString(Text, x,y);
 };
 
@@ -27,4 +29,4 @@ Clockwork.windUp({
         t:require('https://raw.githubusercontent.com/rozek/banglejs-2-date-complication/main/Complication.js'),
         b:baro
   }
-});
+}, {'Foreground':'Theme', 'Background':'Theme'});

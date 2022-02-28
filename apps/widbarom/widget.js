@@ -1,7 +1,7 @@
 (() => {
   var width = 0; // width of the widget
-  var currentPressure={'time':Date(), 'pressure':0};
-  var lastPressure={'time':Date(Date().getTime()-1000), 'pressure':0};
+    var currentPressure={'time':Date().getTime(), 'pressure':0};
+    var lastPressure={'time': (Date(Date().getTime()-1000)).getTime(), 'pressure':0};
   var intervalId=-1;
   function draw() {
     // DO nothing, a pure background widget
