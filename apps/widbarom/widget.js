@@ -1,13 +1,20 @@
 // WIDGETS = {}; // <-- for development only
 (() => {
-    var width = 0; // width of the widget
-    var buflen = 200;
-    var pressures=Float32Array(buflen);
-    var times=Uint32Array(buflen);
-    var head=0;
-    // var currentPressure={'time':Math.round(Date().getTime()/10000), 'pressure':0};
-    // var lastPressure={'time': Math.round((Date(Date().getTime()-100000)).getTime()/10000), 'pressure':0};
-    var intervalId=-1;
+    if (typeof widbarominit == 'undefined') {
+        console.log("widbarom not initialized - initializing");
+        var width = 0; // width of the widget
+        var buflen = 200;
+        var pressures=Float32Array(buflen);
+        var times=Uint32Array(buflen);
+        var head=0;
+        // var currentPressure={'time':Math.round(Date().getTime()/10000), 'pressure':0};
+        // var lastPressure={'time': Math.round((Date(Date().getTime()-100000)).getTime()/10000), 'pressure':0};
+        var intervalId=-1;
+        var widbarominit=true;
+    } else {
+        console.log("widbarom already initialized - do nothing");   
+    }
+    
     function draw() {
         // DO nothing, a pure background widget
     }
@@ -45,11 +52,20 @@
         tail=stepBack(head);
         return {'time': Date(times[tail]*10000), 'pressure': pressures[tail]};
     }
+    
+    function getAllPressures() {
+        return pressures;
+    }
+    
+    function getAllTimes() {
+        return times;
+    }
 
     function getChange(){
-        var tail=head;
-        var lastix = stepBack(head);
-        var tlast = times[lastix];
+        
+        var lastix = stepBack(head); // last saved datapoint
+        var tlast = times[lastix]; // most recent time
+        var tail=lastix;// last saved datapoint
         for(let i=0; i<buflen; i++)
         {
             let tailtmp=stepBack(tail);
@@ -57,6 +73,9 @@
             {
                 dt = (tlast-times[tail])/360;
                 dp = pressures[lastix]-pressures[tail];
+                if (dt==0){
+                    return 0;
+                }
                 return dp/dt;
                 break;
             }
@@ -65,13 +84,13 @@
             {
                 dt = (tlast-times[tail])/360;
                 dp = pressures[lastix]-pressures[tail];
+                if (dt==0){
+                    return 0;
+                }
                 return dp/dt;
                 break;
             } 
         }
-        // dt=(currentPressure.time-lastPressure.time)/(1000*60*60.0);
-        // dp=currentPressure.pressure-lastPressure.pressure;
-        // return dp/dt;
     }
 
     function newInterval(ms){
@@ -87,7 +106,7 @@
         }
     }
     
-    newInterval(10*60*1000);
+    newInterval(5*60*1000);
 
     // add your widget
     WIDGETS["widbarom"]={
@@ -97,7 +116,9 @@
         updateData:updateData,
         getChange:getChange,
         getLastPressure: getLastPressure,
-        newInterval: newInterval
+        newInterval: newInterval,
+        getAllPressures: getAllPressures,
+        getAllTimes: getAllTimes
     };
 })()
 //Bangle.drawWidgets(); // <-- for development only
