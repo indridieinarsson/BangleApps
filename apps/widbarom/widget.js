@@ -1,3 +1,4 @@
+WIDGETS = {}; // <-- for development only
 (() => {
   var width = 0; // width of the widget
     var currentPressure={'time':Date().getTime(), 'pressure':0};
@@ -25,7 +26,8 @@
       }
     }
     Bangle.setBarometerPower(true);
-    Bangle.getPressure().then(baroHandler);
+    // wait 10s for barometer to become available
+    setTimeout(() => Bangle.getPressure().then(baroHandler), 10000);
   }
 
   function getLastPressure(){
@@ -64,3 +66,4 @@
     newInterval: newInterval
   };
 })()
+//Bangle.drawWidgets(); // <-- for development only
