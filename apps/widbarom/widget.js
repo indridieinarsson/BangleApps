@@ -1,5 +1,5 @@
 (() => {
-  var width = 24; // width of the widget
+  var width = 0; // width of the widget
   var currentPressure={'time':Date(), 'pressure':0};
   var lastPressure={'time':Date(Date().getTime()-1000), 'pressure':0};
   var intervalId=-1;
