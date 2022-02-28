@@ -2,15 +2,17 @@
   var width = 24; // width of the widget
   var currentPressure={'time':Date(), 'pressure':0};
   var lastPressure={'time':Date(Date().getTime()-1000), 'pressure':0};
+  var intervalId=-1;
   function draw() {
     // DO nothing, a pure background widget
   }
 
   function updateData() {
     function baroHandler(data) {
-      if (data===undefined) // workaround for https://github.com/espruino/BangleApps/issues/1429
-	console.log("undefined barometer data")
-        setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
+        if (data===undefined){ // workaround for https://github.com/espruino/BangleApps/issues/1429
+            console.log("undefined barometer data")
+            setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
+        }
       else if (data.pressure==0){
 	console.log("barometer data 0")
         setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
@@ -26,7 +28,7 @@
     Bangle.getPressure().then(baroHandler);
   }
 
-  function getCurrent(){
+  function getLastPressure(){
     return currentPressure;
   }
 
@@ -35,10 +37,21 @@
     dp=currentPressure.pressure-lastPressure.pressure;
     return dp/dt;
   }
+
+  function newInterval(ms){
+	  if (intervalId==-1){
+		  console.log("Setting interval");
+		  intervalId = setInterval(function() {
+			  WIDGETS["widbarom"].updateData(WIDGETS["widbarom"]);
+		  }, ms); // update every 0.1 minutes
+	  }
+	  else {
+		  console.log("Changing interval");
+		  changeInterval(intervalId, ms); // update every 0.1 minutes
+	  }
+  }
   
-  setInterval(function() {
-    WIDGETS["widbarom"].updateData(WIDGETS["widbarom"]);
-  }, 5*1000); // update every 0.1 minutes
+  newInterval(60*60*1000);
 
   // add your widget
   WIDGETS["widbarom"]={
@@ -47,6 +60,7 @@
     draw:draw, // called to draw the widget
     updateData:updateData,
     getChange:getChange,
-    getLastPressure: getLastPressure
+    getLastPressure: getLastPressure,
+    newInterval: newInterval
   };
 })()
