@@ -2,18 +2,16 @@
 (() => {
     var width = 0; // width of the widget
     var buflen = 200;
-    var pbuf=ArrayBuffer(buflen*4);
-    var tbuf=ArrayBuffer((buflen+1)*4); // one extra for head
-    var pressures=Float32Array(pbuf);
-    var times=Uint32Array(tbuf); 
+    var pressures=Float32Array(buflen);
+    var times=Uint32Array(buflen+1); 
     var head=0;
     var intervalId=-1;
 
     function initFromFile() {
         let fnamet='widbarom.tdata.bin';
         let fnamep='widbarom.pdata.bin';
-        tbuf = require("Storage").readArrayBuffer('widbarom.tdata.bin');
-        pbuf = require("Storage").readArrayBuffer('widbarom.pdata.bin');
+        let tbuf = require("Storage").readArrayBuffer('widbarom.tdata.bin');
+        let pbuf = require("Storage").readArrayBuffer('widbarom.pdata.bin');
         console.log("initialize...");
         if (typeof tdata !== 'undefined' && typeof pdata !== 'undefined'){
             console.log("Initialize from file");
@@ -52,9 +50,9 @@
                 Bangle.setBarometerPower(false);
                 times[buflen]=head;
                 console.log("Now write pressure data:")
-                require("Storage").write('widbarom.pdata.bin', pbuf);
+                require("Storage").write('widbarom.pdata.bin', pressures.buffer);
                 console.log("Now write time data:")
-                require("Storage").write('widbarom.tdata.bin', tbuf);
+                require("Storage").write('widbarom.tdata.bin', times.buffer);
 		console.log("done writing data");
             }
         }
