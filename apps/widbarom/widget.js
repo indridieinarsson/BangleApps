@@ -1,20 +1,20 @@
 // WIDGETS = {}; // <-- for development only
+if (typeof widbarominit == 'undefined') {
+    console.log("widbarom not initialized - initializing");
+    var width = 0; // width of the widget
+    var buflen = 200;
+    var pressures=Float32Array(buflen);
+    var times=Uint32Array(buflen);
+    var head=0;
+    // var currentPressure={'time':Math.round(Date().getTime()/10000), 'pressure':0};
+    // var lastPressure={'time': Math.round((Date(Date().getTime()-100000)).getTime()/10000), 'pressure':0};
+    var intervalId=-1;
+    var widbarominit=true;
+} else {
+    console.log("widbarom already initialized - do nothing");
+}
 (() => {
-    if (typeof WIDGETS.widbarom == 'undefined') {
-        console.log("widbarom not initialized - initializing");
-        var width = 0; // width of the widget
-        var buflen = 200;
-        var pressures=Float32Array(buflen);
-        var times=Uint32Array(buflen);
-        var head=0;
-        // var currentPressure={'time':Math.round(Date().getTime()/10000), 'pressure':0};
-        // var lastPressure={'time': Math.round((Date(Date().getTime()-100000)).getTime()/10000), 'pressure':0};
-        var intervalId=-1;
-        var widbarominit=true;
-    } else {
-        console.log("widbarom already initialized - do nothing");
-        return;
-    }
+    
     
     function draw() {
         // DO nothing, a pure background widget
