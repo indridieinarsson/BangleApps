@@ -2,8 +2,6 @@
 (() => {
     var width = 0; // width of the widget
     var buflen = 200;
-    var pressures=Float32Array(buflen);
-    var times=Uint32Array(buflen+1); 
     var head=0;
     var intervalId=-1;
 
@@ -12,17 +10,19 @@
         let fnamep='widbarom.pdata.bin';
         let tbuf = require("Storage").readArrayBuffer('widbarom.tdata.bin');
         let pbuf = require("Storage").readArrayBuffer('widbarom.pdata.bin');
+        var pressures=Float32Array(buflen);
+        var times=Uint32Array(buflen+1); 
         console.log("initialize...");
         if (typeof tbuf !== 'undefined' && typeof pbuf !== 'undefined'){
             console.log("Initialize from file");
-            times = new Uint32Array(tbuf);
-            pressures = new Float32Array(pbuf);
+            times      = new Uint32Array(new Uint32Array(tbuf));
+            pressures = new Float32Array(new Float32Array(pbuf));
             buflen = pressures.length;
             head = times[buflen];
             console.log("Head : "+head + "  buflen :" + buflen);
         }
     }
-    
+
     function draw() {
         // DO nothing, a pure background widget
     }
@@ -34,11 +34,11 @@
     function updateData() {
         function baroHandler(data) {
             if (data===undefined){ // workaround for https://github.com/espruino/BangleApps/issues/1429
-                console.log("undefined barometer data")
+                console.log("undefined barometer data");
                 setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
             }
             else if (data.pressure==0){
-                console.log("barometer data 0")
+                console.log("barometer data 0");
                 setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
             }
             else {
@@ -48,12 +48,14 @@
                 //currentPressure={'time':Math.round(Date().getTime()/10000), 'pressure':  data.pressure};
                 pressures[head] = data.pressure;
                 times[head] = Math.round(Date().getTime()/10000);
-                if (++head >= buflen){ head=0; }
+                head++;
+                if (head >= buflen){ head=0; }
                 Bangle.setBarometerPower(false);
                 times[buflen]=head;
-                console.log("Now write pressure data:")
+                console.log("times end ", times[buflen]);
+                console.log("Now write pressure data:");
                 require("Storage").write('widbarom.pdata.bin', pressures.buffer);
-                console.log("Now write time data:")
+                console.log("Now write time data:");
                 require("Storage").write('widbarom.tdata.bin', times.buffer);
                 console.log("done writing data");
             }
