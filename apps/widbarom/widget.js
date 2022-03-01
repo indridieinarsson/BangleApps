@@ -13,7 +13,7 @@
         let tbuf = require("Storage").readArrayBuffer('widbarom.tdata.bin');
         let pbuf = require("Storage").readArrayBuffer('widbarom.pdata.bin');
         console.log("initialize...");
-        if (typeof tdata !== 'undefined' && typeof pdata !== 'undefined'){
+        if (typeof tbuf !== 'undefined' && typeof pbuf !== 'undefined'){
             console.log("Initialize from file");
             times = new Uint32Array(tbuf);
             pressures = new Float32Array(pbuf);
