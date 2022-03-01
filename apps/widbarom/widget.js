@@ -3,11 +3,25 @@
     var width = 0; // width of the widget
     var buflen = 200;
     var pressures=Float32Array(buflen);
-    var times=Uint32Array(buflen);
+    var times=Uint32Array(buflen+1); // one extra for head
     var head=0;
-    // var currentPressure={'time':Math.round(Date().getTime()/10000), 'pressure':0};
-    // var lastPressure={'time': Math.round((Date(Date().getTime()-100000)).getTime()/10000), 'pressure':0};
     var intervalId=-1;
+
+    function initFromFile() {
+        let fnamet='widbarom.tdata.bin';
+        let fnamep='widbarom.pdata.bin';
+        var tdata = require("Storage").readArrayBuffer('widbarom.tdata.bin');
+        var pdata = require("Storage").readArrayBuffer('widbarom.pdata.bin');
+        console.log("initialize...");
+        if (typeof tdata !== 'undefined' && typeof pdata !== 'undefined'){
+            console.log("Initialize from file");
+            times = new Uint32Array(tdata);
+            pressures = new Float32Array(pdata);
+            buflen = pressures.length;
+            head = times[length]M
+        }
+    }
+    
     function draw() {
         // DO nothing, a pure background widget
     }
@@ -34,6 +48,10 @@
                 times[head] = Math.round(Date().getTime()/10000);
                 if (++head >= buflen){ head=0; }
                 Bangle.setBarometerPower(false);
+                times[buflen]=head;
+                console.log("Now write data:")
+                require("Storage").write('widbarom.pdata.bin', pressures);
+                require("Storage").write('widbarom.tdata.bin', times);
             }
         }
         Bangle.setBarometerPower(true);
@@ -45,11 +63,20 @@
         tail=stepBack(head);
         return {'time': Date(times[tail]*10000), 'pressure': pressures[tail]};
     }
+    
+    function getAllPressures() {
+        return pressures;
+    }
+    
+    function getAllTimes() {
+        return times;
+    }
 
     function getChange(){
-        var tail=head;
-        var lastix = stepBack(head);
-        var tlast = times[lastix];
+        
+        var lastix = stepBack(head); // last saved datapoint
+        var tlast = times[lastix]; // most recent time
+        var tail=lastix;// last saved datapoint
         for(let i=0; i<buflen; i++)
         {
             let tailtmp=stepBack(tail);
@@ -57,6 +84,9 @@
             {
                 dt = (tlast-times[tail])/360;
                 dp = pressures[lastix]-pressures[tail];
+                if (dt==0){
+                    return 0;
+                }
                 return dp/dt;
                 break;
             }
@@ -65,13 +95,13 @@
             {
                 dt = (tlast-times[tail])/360;
                 dp = pressures[lastix]-pressures[tail];
+                if (dt==0){
+                    return 0;
+                }
                 return dp/dt;
                 break;
             } 
         }
-        // dt=(currentPressure.time-lastPressure.time)/(1000*60*60.0);
-        // dp=currentPressure.pressure-lastPressure.pressure;
-        // return dp/dt;
     }
 
     function newInterval(ms){
@@ -86,8 +116,8 @@
             changeInterval(intervalId, ms); // update every 0.1 minutes
         }
     }
-    
-    newInterval(10*60*1000);
+    initFromFile();
+    newInterval(5*60*1000);
 
     // add your widget
     WIDGETS["widbarom"]={
@@ -97,7 +127,9 @@
         updateData:updateData,
         getChange:getChange,
         getLastPressure: getLastPressure,
-        newInterval: newInterval
+        newInterval: newInterval,
+        getAllPressures: getAllPressures,
+        getAllTimes: getAllTimes
     };
 })()
 //Bangle.drawWidgets(); // <-- for development only
