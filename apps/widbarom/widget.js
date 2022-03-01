@@ -4,7 +4,7 @@
     var buflen = 200;
     var pbuf=ArrayBuffer(buflen*4);
     var tbuf=ArrayBuffer((buflen+1)*4); // one extra for head
-    var pressures=Float32Array(tbuf);
+    var pressures=Float32Array(pbuf);
     var times=Uint32Array(tbuf); 
     var head=0;
     var intervalId=-1;
@@ -51,9 +51,11 @@
                 if (++head >= buflen){ head=0; }
                 Bangle.setBarometerPower(false);
                 times[buflen]=head;
-                console.log("Now write data:")
+                console.log("Now write pressure data:")
                 require("Storage").write('widbarom.pdata.bin', pbuf);
+                console.log("Now write time data:")
                 require("Storage").write('widbarom.tdata.bin', tbuf);
+		console.log("done writing data");
             }
         }
         Bangle.setBarometerPower(true);
