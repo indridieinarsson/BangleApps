@@ -12,11 +12,13 @@
         let fnamep='widbarom.pdata.bin';
         var tdata = require("Storage").readArrayBuffer('widbarom.tdata.bin');
         var pdata = require("Storage").readArrayBuffer('widbarom.pdata.bin');
+        console.log("initialize...");
         if (typeof tdata !== 'undefined' && typeof pdata !== 'undefined'){
+            console.log("Initialize from file");
             times = new Uint32Array(tdata);
             pressures = new Float32Array(pdata);
-            buflen = pressures.length
-            head = times[length]
+            buflen = pressures.length;
+            head = times[length]M
         }
     }
     
@@ -114,7 +116,7 @@
             changeInterval(intervalId, ms); // update every 0.1 minutes
         }
     }
-    
+    initFromFile();
     newInterval(5*60*1000);
 
     // add your widget
