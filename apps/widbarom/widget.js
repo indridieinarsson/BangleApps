@@ -19,7 +19,7 @@
             pressures = new Float32Array(pbuf);
             buflen = pressures.length;
             head = times[buflen];
-		console.log("Head : "+head + "  buflen :" + buflen);
+            console.log("Head : "+head + "  buflen :" + buflen);
         }
     }
     
@@ -43,7 +43,7 @@
             }
             else {
                 console.log("got barometer data " + data.pressure);
-		    console.log("Head : "+head + "  buflen :" + buflen);
+                console.log("Head : "+head + "  buflen :" + buflen);
                 //lastPressure = currentPressure;
                 //currentPressure={'time':Math.round(Date().getTime()/10000), 'pressure':  data.pressure};
                 pressures[head] = data.pressure;
@@ -55,7 +55,7 @@
                 require("Storage").write('widbarom.pdata.bin', pressures.buffer);
                 console.log("Now write time data:")
                 require("Storage").write('widbarom.tdata.bin', times.buffer);
-		console.log("done writing data");
+                console.log("done writing data");
             }
         }
         Bangle.setBarometerPower(true);
@@ -127,7 +127,7 @@
     WIDGETS["widbarom"]={
         area:"tl", // tl (top left), tr (top right), bl (bottom left), br (bottom right)
         width: width, // how wide is the widget? You can change this and call Bangle.drawWidgets() to re-layout
-	head: head,
+        head: head,
         draw:draw, // called to draw the widget
         updateData:updateData,
         getChange:getChange,
