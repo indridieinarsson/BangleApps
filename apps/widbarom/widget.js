@@ -1,20 +1,24 @@
 // WIDGETS = {}; // <-- for development only
-if (typeof widbarominit == 'undefined') {
-    console.log("widbarom not initialized - initializing");
+(() => {
     var width = 0; // width of the widget
     var buflen = 200;
     var pressures=Float32Array(buflen);
-    var times=Uint32Array(buflen);
+    var times=Uint32Array(buflen+1); // one extra for head
     var head=0;
-    // var currentPressure={'time':Math.round(Date().getTime()/10000), 'pressure':0};
-    // var lastPressure={'time': Math.round((Date(Date().getTime()-100000)).getTime()/10000), 'pressure':0};
     var intervalId=-1;
-    var widbarominit=true;
-} else {
-    console.log("widbarom already initialized - do nothing");
-}
-(() => {
-    
+
+    function initFromFile() {
+        let fnamet='widbarom.tdata.bin';
+        let fnamep='widbarom.pdata.bin';
+        var tdata = require("Storage").readArrayBuffer('widbarom.tdata.bin');
+        var pdata = require("Storage").readArrayBuffer('widbarom.pdata.bin');
+        if (typeof tdata !== 'undefined' && typeof pdata !== 'undefined'){
+            times = new Uint32Array(tdata);
+            pressures = new Float32Array(pdata);
+            buflen = pressures.length
+            head = times[length]
+        }
+    }
     
     function draw() {
         // DO nothing, a pure background widget
@@ -42,6 +46,10 @@ if (typeof widbarominit == 'undefined') {
                 times[head] = Math.round(Date().getTime()/10000);
                 if (++head >= buflen){ head=0; }
                 Bangle.setBarometerPower(false);
+                times[buflen]=head;
+                console.log("Now write data:")
+                require("Storage").write('widbarom.pdata.bin', pressures);
+                require("Storage").write('widbarom.tdata.bin', times);
             }
         }
         Bangle.setBarometerPower(true);
