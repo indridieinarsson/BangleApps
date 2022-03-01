@@ -18,7 +18,7 @@
             times = new Uint32Array(tdata);
             pressures = new Float32Array(pdata);
             buflen = pressures.length;
-            head = times[length]M
+            head = times[length];
         }
     }
     
