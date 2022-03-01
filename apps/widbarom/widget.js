@@ -19,6 +19,7 @@
             pressures = new Float32Array(pbuf);
             buflen = pressures.length;
             head = times[buflen];
+		console.log("Head : "+head + "  buflen :" + buflen);
         }
     }
     
@@ -41,7 +42,8 @@
                 setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
             }
             else {
-                console.log("got barometer data " + data.pressure)
+                console.log("got barometer data " + data.pressure);
+		    console.log("Head : "+head + "  buflen :" + buflen);
                 //lastPressure = currentPressure;
                 //currentPressure={'time':Math.round(Date().getTime()/10000), 'pressure':  data.pressure};
                 pressures[head] = data.pressure;
