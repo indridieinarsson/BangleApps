@@ -50,8 +50,8 @@
                 Bangle.setBarometerPower(false);
                 times[buflen]=head;
                 console.log("Now write data:")
-                require("Storage").write('widbarom.pdata.bin', pressures);
-                require("Storage").write('widbarom.tdata.bin', times);
+                require("Storage").write('widbarom.pdata.bin', pressures, 0, pressures.length*4);
+                require("Storage").write('widbarom.tdata.bin', times, 0, times.length*4);
             }
         }
         Bangle.setBarometerPower(true);
