@@ -125,6 +125,7 @@
     WIDGETS["widbarom"]={
         area:"tl", // tl (top left), tr (top right), bl (bottom left), br (bottom right)
         width: width, // how wide is the widget? You can change this and call Bangle.drawWidgets() to re-layout
+	head: head,
         draw:draw, // called to draw the widget
         updateData:updateData,
         getChange:getChange,
