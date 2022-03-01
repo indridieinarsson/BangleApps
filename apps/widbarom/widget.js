@@ -4,14 +4,14 @@
     var buflen = 200;
     var head=0;
     var intervalId=-1;
+    var pressures=Float32Array(buflen);
+    var times=Uint32Array(buflen+1); 
 
     function initFromFile() {
         let fnamet='widbarom.tdata.bin';
         let fnamep='widbarom.pdata.bin';
         let tbuf = require("Storage").readArrayBuffer('widbarom.tdata.bin');
         let pbuf = require("Storage").readArrayBuffer('widbarom.pdata.bin');
-        var pressures=Float32Array(buflen);
-        var times=Uint32Array(buflen+1); 
         console.log("initialize...");
         if (typeof tbuf !== 'undefined' && typeof pbuf !== 'undefined'){
             console.log("Initialize from file");
