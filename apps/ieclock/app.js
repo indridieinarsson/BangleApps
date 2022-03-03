@@ -29,7 +29,7 @@ sunrise.draw = function draw(x, y, Radius, Settings) {
     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
     g.setFont('Vector', 18);
     g.setFontAlign(0,0);
-    Text = this.compactTime(ieclock.sunrise);
+    Text = this.compactTime(ieclock.times.sunrise);
     g.drawString(Text, x,y);
 };
 
