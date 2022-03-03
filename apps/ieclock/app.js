@@ -35,7 +35,7 @@ function drawEvent(ev, x, y, Radius, Settings) {
     auxdial.draw(Settings, x, y, Radius+1,h ,m , true);
     // Text = this.compactTime(ieclock.sunrise);
     // g.drawString(Text, x,y);
-};
+}
 
 sunrise.draw = drawEvent.bind(this, 'sunrise');
 
