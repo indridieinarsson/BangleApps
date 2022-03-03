@@ -17,9 +17,11 @@ global.ieclock = {
     sunset: Date,
     location: {},
     LOCATION_FILE: "mylocation.json",
-    intervalId: setInterval(function() {
-        updateSunRiseSunSet()
-            }, 1000*60*60*24); // update daily
+    intervalId: -1 
 } 
 
 updateSunRiseSunSet();
+
+ieclock.intervaldId = setInterval(function() {
+    updateSunRiseSunSet();
+}, 1000*60*60*24); // update daily
