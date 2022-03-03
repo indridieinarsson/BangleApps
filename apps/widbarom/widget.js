@@ -2,24 +2,27 @@
 (() => {
     var width = 0; // width of the widget
     var buflen = 200;
-    var pressures=Float32Array(buflen);
-    var times=Uint32Array(buflen+1); // one extra for head
     var head=0;
     var intervalId=-1;
+    var pressures=Float32Array(buflen);
+    var times=Uint32Array(buflen+1); 
 
     function initFromFile() {
         let fnamet='widbarom.tdata.bin';
         let fnamep='widbarom.pdata.bin';
-        var tdata = require("Storage").readArrayBuffer('widbarom.tdata.bin');
-        var pdata = require("Storage").readArrayBuffer('widbarom.pdata.bin');
-        if (typeof tdata !== 'undefined' && typeof pdata !== 'undefined'){
-            times = new Uint32Array(tdata);
-            pressures = new Float32Array(pdata);
-            buflen = pressures.length
-            head = times[length]
+        let tbuf = require("Storage").readArrayBuffer('widbarom.tdata.bin');
+        let pbuf = require("Storage").readArrayBuffer('widbarom.pdata.bin');
+        console.log("initialize...");
+        if (typeof tbuf !== 'undefined' && typeof pbuf !== 'undefined'){
+            console.log("Initialize from file");
+            times      = new Uint32Array(new Uint32Array(tbuf));
+            pressures = new Float32Array(new Float32Array(pbuf));
+            buflen = pressures.length;
+            head = times[buflen];
+            console.log("Head : "+head + "  buflen :" + buflen);
         }
     }
-    
+
     function draw() {
         // DO nothing, a pure background widget
     }
@@ -31,25 +34,30 @@
     function updateData() {
         function baroHandler(data) {
             if (data===undefined){ // workaround for https://github.com/espruino/BangleApps/issues/1429
-                console.log("undefined barometer data")
+                console.log("undefined barometer data");
                 setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
             }
             else if (data.pressure==0){
-                console.log("barometer data 0")
+                console.log("barometer data 0");
                 setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
             }
             else {
-                console.log("got barometer data " + data.pressure)
+                console.log("got barometer data " + data.pressure);
+                console.log("Head : "+head + "  buflen :" + buflen);
                 //lastPressure = currentPressure;
                 //currentPressure={'time':Math.round(Date().getTime()/10000), 'pressure':  data.pressure};
                 pressures[head] = data.pressure;
                 times[head] = Math.round(Date().getTime()/10000);
-                if (++head >= buflen){ head=0; }
+                head++;
+                if (head >= buflen){ head=0; }
                 Bangle.setBarometerPower(false);
                 times[buflen]=head;
-                console.log("Now write data:")
-                require("Storage").write('widbarom.pdata.bin', pressures);
-                require("Storage").write('widbarom.tdata.bin', times);
+                console.log("times end ", times[buflen]);
+                console.log("Now write pressure data:");
+                require("Storage").write('widbarom.pdata.bin', pressures.buffer);
+                console.log("Now write time data:");
+                require("Storage").write('widbarom.tdata.bin', times.buffer);
+                console.log("done writing data");
             }
         }
         Bangle.setBarometerPower(true);
@@ -114,13 +122,14 @@
             changeInterval(intervalId, ms); // update every 0.1 minutes
         }
     }
-    
+    initFromFile();
     newInterval(5*60*1000);
 
     // add your widget
     WIDGETS["widbarom"]={
         area:"tl", // tl (top left), tr (top right), bl (bottom left), br (bottom right)
         width: width, // how wide is the widget? You can change this and call Bangle.drawWidgets() to re-layout
+        head: head,
         draw:draw, // called to draw the widget
         updateData:updateData,
         getChange:getChange,

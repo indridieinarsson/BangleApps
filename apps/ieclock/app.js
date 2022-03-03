@@ -46,5 +46,5 @@ Clockwork.windUp({
         r:require('https://raw.githubusercontent.com/rozek/banglejs-2-moon-phase-complication/main/Complication.js'),
         t:require('https://raw.githubusercontent.com/rozek/banglejs-2-date-complication/main/Complication.js'),
         b:baro
-  }
+    }
 }, {'Foreground':'Theme', 'Background':'Theme'});
