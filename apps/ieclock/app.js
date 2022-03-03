@@ -23,19 +23,25 @@ sunrise.compactTime = function(t) {
     return ''+t.getHours()+this.quarters[Math.round(t.getMinutes()/15)];
 };
 
-sunrise.draw = function draw(x, y, Radius, Settings) {
+function drawEvent(ev, x, y, Radius, Settings) {
     auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
     let halfScreenWidth   = g.getWidth() / 2;
     let largeComplication = (x === halfScreenWidth);
     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
     g.setFont('Vector', 18);
     g.setFontAlign(0,0);
-    let h = ieclock.sunrise.getHours()
-    let m = ieclock.sunrise.getMinutes()
-    auxdial.draw(Settings, x, y, Radius,h ,m , true);
+    let h = ieclock[ev].getHours()
+    let m = ieclock[ev].getMinutes()
+    auxdial.draw(Settings, x, y, Radius+1,h ,m , true);
     // Text = this.compactTime(ieclock.sunrise);
     // g.drawString(Text, x,y);
 };
+
+sunrise.draw = drawEvent.bind(this, 'sunrise');
+
+sunrise.whichevent = function whichevent (ev) {
+    return { draw:drawEvent.bind(this,ev) };
+  };
 
 require('https://raw.githubusercontent.com/rozek/banglejs-2-widgets-on-background/main/drawWidgets.js');
 
@@ -46,8 +52,8 @@ Clockwork.windUp({
     size: require('https://raw.githubusercontent.com/rozek/banglejs-2-smart-clock-size/main/ClockSize.js'),
     hands: require('https://raw.githubusercontent.com/rozek/banglejs-2-hollow-clock-hands/main/ClockHands.js'),
     complications: {
-        l:sunrise,
-        r:require('https://raw.githubusercontent.com/rozek/banglejs-2-moon-phase-complication/main/Complication.js'),
+        l:sunrise.whichevent('sunrise'),
+        r:sunrise.whichevent('sunset'),
         t:require('https://raw.githubusercontent.com/rozek/banglejs-2-date-complication/main/Complication.js'),
         b:baro
     }
