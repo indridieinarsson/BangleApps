@@ -8,13 +8,13 @@ function updateSunRiseSunSet(){
     // get today's sunlight times for lat/lon
     let times = SunCalc.getTimes(new Date(), location.lat, location.lon);
     // format sunrise time from the Date object
-    ieclock.sunRise = extractTime(times.sunrise);
-    ieclock.sunSet = extractTime(times.sunset);
+    ieclock.sunrise = extractTime(times.sunrise);
+    ieclock.sunset = extractTime(times.sunset);
 }
 
 global.ieclock = {
     sunrise: Date(),
-    sunset: Date,
+    sunset: Date(),
     location: {},
     LOCATION_FILE: "mylocation.json",
     intervalId: -1 
