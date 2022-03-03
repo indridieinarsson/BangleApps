@@ -5,12 +5,10 @@ function updateSunRiseSunSet(){
     location.lat = location.lat||51.5072;
     location.lon = location.lon||0.1276;
     location.location = location.location||"London";
-    // get today's sunlight times for lat/lon
     let times = SunCalc.getTimes(new Date(), location.lat, location.lon);
     ieclock.times = times;
-    // format sunrise time from the Date object
-    ieclock.sunrise = extractTime(times.sunrise);
-    ieclock.sunset = extractTime(times.sunset);
+    ieclock.sunrise = times.sunrise;
+    ieclock.sunset = times.sunset;
 }
 
 global.ieclock = {

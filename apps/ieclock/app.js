@@ -24,13 +24,17 @@ sunrise.compactTime = function(t) {
 };
 
 sunrise.draw = function draw(x, y, Radius, Settings) {
+    auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
     let halfScreenWidth   = g.getWidth() / 2;
     let largeComplication = (x === halfScreenWidth);
     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
     g.setFont('Vector', 18);
     g.setFontAlign(0,0);
-    Text = this.compactTime(ieclock.sunrise);
-    g.drawString(Text, x,y);
+    let h = ieclock.sunrise.getHours()
+    let m = ieclock.sunrise.getMinutes()
+    auxdial.draw(Settings, x, y, Radius,h ,m , true);
+    // Text = this.compactTime(ieclock.sunrise);
+    // g.drawString(Text, x,y);
 };
 
 require('https://raw.githubusercontent.com/rozek/banglejs-2-widgets-on-background/main/drawWidgets.js');
