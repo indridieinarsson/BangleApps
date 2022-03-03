@@ -4,16 +4,33 @@
 // 3/4 : String.fromCharCode(190)
 baro = {};
 baro.draw = function draw(x,y,Radius, Settings) {
-  let halfScreenWidth   = g.getWidth() / 2;
-  let largeComplication = (x === halfScreenWidth);
-  g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
-  g.setFont('Vector', 18);
-  g.setFontAlign(0,0);
-  dp = Math.round(WIDGETS.widbarom.getChange() * 10) / 10;
-  p = Math.round(WIDGETS.widbarom.getLastPressure().pressure);
-    dpsign = (dp<0?"-":"+") + dp;
-  Text = ''+p+dpsign+"Hp";
-  g.drawString(Text, x,y);
+    let halfScreenWidth   = g.getWidth() / 2;
+    let largeComplication = (x === halfScreenWidth);
+    g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
+    g.setFont('Vector', 18);
+    g.setFontAlign(0,0);
+    dp = Math.round(WIDGETS.widbarom.getChange() * 10) / 10;
+    p = Math.round(WIDGETS.widbarom.getLastPressure().pressure);
+    dpsign = (dp<0?"":"+") + dp;
+    Text = ''+p+dpsign+"Hp";
+    g.drawString(Text, x,y);
+};
+
+sunrise = {};
+sunrise.quarters = [0, String.fromCharCode(188), String.fromCharCode(189), String.fromCharCode(190), 0];
+
+sunrise.compactTime = function(t) {
+    return ''+t.getHours()+this.quarters[Math.round(t.getMinutes()/15)];
+};
+
+sunrise.draw = function draw(x, y, Radius, Settings) {
+    let halfScreenWidth   = g.getWidth() / 2;
+    let largeComplication = (x === halfScreenWidth);
+    g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
+    g.setFont('Vector', 18);
+    g.setFontAlign(0,0);
+    Text = this.compactTime(today);
+    g.drawString(Text, x,y);
 };
 
 require('https://raw.githubusercontent.com/rozek/banglejs-2-widgets-on-background/main/drawWidgets.js');
@@ -25,7 +42,7 @@ Clockwork.windUp({
     size: require('https://raw.githubusercontent.com/rozek/banglejs-2-smart-clock-size/main/ClockSize.js'),
     hands: require('https://raw.githubusercontent.com/rozek/banglejs-2-hollow-clock-hands/main/ClockHands.js'),
     complications: {
-        l:require('https://raw.githubusercontent.com/rozek/banglejs-2-weekday-complication/main/Complication.js'),
+        l:sunrise,
         r:require('https://raw.githubusercontent.com/rozek/banglejs-2-moon-phase-complication/main/Complication.js'),
         t:require('https://raw.githubusercontent.com/rozek/banglejs-2-date-complication/main/Complication.js'),
         b:baro

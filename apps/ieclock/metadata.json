@@ -1,7 +1,7 @@
 { "id": "ieclock",
   "name": "Analog Clock with barometer info",
   "shortName":"IE Clock",
-  "version":"0.04",
+  "version":"0.05",
   "description": "a simple, yet stylish, analog clock with barometer info",
   "icon": "app-icon.png",
   "type": "clock",
@@ -12,6 +12,7 @@
   "readme": "README.md",
   "storage": [
     {"name":"ieclock.app.js","url":"app.js"},
+    {"name":"ieclock.boot.js","url":"boot.js"},
     {"name":"ieclock.img","url":"app-icon.js","evaluate":true}
   ]
 }
