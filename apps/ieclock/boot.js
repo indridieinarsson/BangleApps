@@ -24,7 +24,13 @@ function updateTide() {
             break;
         }
     }
-    ieclock.tides = {'time': Date(e[0]), 'height': e[1]/100.0, 'high': e[2]}
+    ieclock.tides = {
+        'time': Date(parseInt(e[0])),
+        'timestamp':parseInt(e[0]),
+        'e':e,
+        'height':parseInt(e[1])/100.0,
+        'high':  (e[2]=='true'?true:false)
+    }
 }
 
 global.ieclock = {
@@ -35,7 +41,9 @@ global.ieclock = {
     tides: {},
     LOCATION_FILE: "mylocation.json",
     TIDE_FILE: "tides.data.csv",
-    intervalId: -1 
+    intervalId: -1,
+    updateTide: updateTide,
+    updateSunRiseSunSet: updateSunRiseSunSet
 } 
 
 updateSunRiseSunSet();

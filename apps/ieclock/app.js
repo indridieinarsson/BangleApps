@@ -22,22 +22,30 @@ sunrise.compactTime = function(t) {
 };
 
 tide = {};
+
+tide.quarters = [0, String.fromCharCode(188), String.fromCharCode(189), String.fromCharCode(190), 0];
+
+tide.compactTime = function(t) {
+    return ''+t.getHours()+this.quarters[Math.round(t.getMinutes()/15)];
+};
+
 tide.draw = function(x, y, Radius, Settings) {
     console.log("x "+x+" y "+y+" r "+Radius+ " Settings "+Settings);
-    auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
     let halfScreenWidth   = g.getWidth() / 2;
     let largeComplication = (x === halfScreenWidth);
-    let rmult = (largeComplication?1.65:1.3)
-    let h = ieclock.tides.time.getHours()
-    let m = ieclock.tides.time.getMinutes()
-    auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h ,m , true);
+    // auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
+    // let rmult = (largeComplication?1.65:1.3)
+    // let h = ieclock.tides.time.getHours()
+    // let m = ieclock.tides.time.getMinutes()
+    //auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h ,m , true);
+    let Text = this.compactTime(ieclock.tides.time)
     if (largeComplication){
-        g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
-        g.setFont('Vector', 16);
-        g.setFontAlign(0,0);
-        Text = ''+ieclock.tides.height.toFixed(1);
-        g.drawString(Text, x, y);
+        Text = Text+" "ieclock.tides.height.toFixed(1)+"m";
     }
+    g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
+    g.setFont('Vector', 16);
+    g.setFontAlign(0,0);
+    g.drawString(Text, x, y);
 }
 
 // tideheight = {};
