@@ -38,15 +38,15 @@ tide.draw = function(x, y, Radius, Settings) {
     // let h = ieclock.tides.time.getHours()
     // let m = ieclock.tides.time.getMinutes()
     //auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h ,m , true);
-    let Text = this.compactTime(ieclock.tides.time)
+    let Text = this.compactTime(ieclock.tides.time);
     if (largeComplication){
-        Text = Text+" "ieclock.tides.height.toFixed(1)+"m";
+        Text = Text+" "+ieclock.tides.height.toFixed(1)+"m";
     }
     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
     g.setFont('Vector', 16);
     g.setFontAlign(0,0);
     g.drawString(Text, x, y);
-}
+};
 
 // tideheight = {};
 // tideheight.draw = function() {
@@ -60,11 +60,11 @@ tide.draw = function(x, y, Radius, Settings) {
 function drawEvent(ev, x, y, Radius, Settings) {
     let halfScreenWidth   = g.getWidth() / 2;
     let largeComplication = (x === halfScreenWidth);
-    let rmult = (largeComplication?1.65:1.3)
+    let rmult = (largeComplication?1.65:1.3);
     auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
-    let h = ieclock[ev].getHours()
-    let m = ieclock[ev].getMinutes()
+    let h = ieclock[ev].getHours();
+    let m = ieclock[ev].getMinutes();
     auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h ,m , true);
 }
 
