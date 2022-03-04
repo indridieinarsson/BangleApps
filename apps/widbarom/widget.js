@@ -6,6 +6,7 @@
     var intervalId=-1;
     var pressures=Float32Array(buflen);
     var times=Uint32Array(buflen+1); 
+    var retries=0;
 
     function initFromFile() {
         let fnamet='widbarom.tdata.bin';
@@ -35,15 +36,26 @@
         function baroHandler(data) {
             if (data===undefined){ // workaround for https://github.com/espruino/BangleApps/issues/1429
                 console.log("undefined barometer data");
-                Bangle.setBarometerPower(true);
-                setTimeout(() => Bangle.getPressure().then(baroHandler), 10000);
+                if (retries<4){
+                    Bangle.setBarometerPower(true);
+                    setTimeout(() => Bangle.getPressure().then(baroHandler), 10000);
+                    retries++;
+                } else {
+                    console.log("Too many retries");
+                    Bangle.setBarometerPower(false);
+                    retries=0;
+                }
             }
             else if (data.pressure==0){
                 console.log("barometer data 0");
-                Bangle.setBarometerPower(true);
-                setTimeout(() => Bangle.getPressure().then(baroHandler), 10000);
+                Bangle.setBarometerPower(false);
+                retries=0;
+                return;
+                //Bangle.setBarometerPower(true);
+                //setTimeout(() => Bangle.getPressure().then(baroHandler), 10000);
             }
             else {
+                retries = 0;
                 console.log("got barometer data " + data.pressure);
                 console.log("Head : "+head + "  buflen :" + buflen);
                 //lastPressure = currentPressure;
@@ -54,12 +66,6 @@
                 if (head >= buflen){ head=0; }
                 Bangle.setBarometerPower(false);
                 times[buflen]=head;
-                console.log("times end ", times[buflen]);
-                console.log("Now write pressure data:");
-                require("Storage").write('widbarom.pdata.bin', pressures.buffer);
-                console.log("Now write time data:");
-                require("Storage").write('widbarom.tdata.bin', times.buffer);
-                console.log("done writing data");
             }
         }
         Bangle.setBarometerPower(true);
@@ -126,6 +132,17 @@
     }
     initFromFile();
     newInterval(5*60*1000);
+    E.on('kill', WIDGETS.widbarom.saveData);
+
+    function saveData () {
+        console.log("Saving data");
+        console.log("times end ", times[buflen]);
+        console.log("Now write pressure data:");
+        require("Storage").write('widbarom.pdata.bin', pressures.buffer);
+        console.log("Now write time data:");
+        require("Storage").write('widbarom.tdata.bin', times.buffer);
+        console.log("done writing data");
+    }
 
     // add your widget
     WIDGETS["widbarom"]={
@@ -138,7 +155,8 @@
         getLastPressure: getLastPressure,
         newInterval: newInterval,
         getAllPressures: getAllPressures,
-        getAllTimes: getAllTimes
+        getAllTimes: getAllTimes,
+        saveData: saveData
     };
 })()
 //Bangle.drawWidgets(); // <-- for development only
