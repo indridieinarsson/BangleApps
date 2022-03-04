@@ -35,11 +35,13 @@
         function baroHandler(data) {
             if (data===undefined){ // workaround for https://github.com/espruino/BangleApps/issues/1429
                 console.log("undefined barometer data");
-                setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
+                Bangle.setBarometerPower(true);
+                setTimeout(() => Bangle.getPressure().then(baroHandler), 10000);
             }
             else if (data.pressure==0){
                 console.log("barometer data 0");
-                setTimeout(() => Bangle.getPressure().then(baroHandler), 500);
+                Bangle.setBarometerPower(true);
+                setTimeout(() => Bangle.getPressure().then(baroHandler), 10000);
             }
             else {
                 console.log("got barometer data " + data.pressure);

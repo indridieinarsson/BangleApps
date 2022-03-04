@@ -22,7 +22,7 @@ sunrise.compactTime = function(t) {
 };
 
 tide = {};
-tide.draw = function() {
+tide.draw = function(x, y, Radius, Settings) {
     auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
     let halfScreenWidth   = g.getWidth() / 2;
     let largeComplication = (x === halfScreenWidth);

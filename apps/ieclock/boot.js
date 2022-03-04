@@ -44,4 +44,4 @@ updateTide();
 ieclock.intervaldId = setInterval(function() {
     updateSunRiseSunSet();
     updateTide();
-}, 1000*60*60*24); // update daily
+}, 1000*60*60*2); // update occasionally
