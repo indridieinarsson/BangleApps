@@ -72,13 +72,11 @@ sunrise.draw = drawEvent.bind(this, 'sunrise');
 
 sunrise.whichevent = function whichevent (ev) {
     return { draw:drawEvent.bind(this,ev) };
-  };
+};
 
 require('https://raw.githubusercontent.com/rozek/banglejs-2-widgets-on-background/main/drawWidgets.js');
-
 let Clockwork = require('https://raw.githubusercontent.com/rozek/banglejs-2-simple-clockwork/main/Clockwork.js');
 
-        // t:require('https://raw.githubusercontent.com/rozek/banglejs-2-date-complication/main/Complication.js'),
 Clockwork.windUp({
     face:require('https://raw.githubusercontent.com/rozek/banglejs-2-twelve-numbered-clock-face/main/ClockFace.js'),
     size: require('https://raw.githubusercontent.com/rozek/banglejs-2-smart-clock-size/main/ClockSize.js'),
