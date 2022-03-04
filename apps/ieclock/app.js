@@ -4,6 +4,7 @@
 // 3/4 : String.fromCharCode(190)
 baro = {};
 baro.draw = function draw(x,y,Radius, Settings) {
+    try {
     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
     g.setFont('Vector', 18);
     g.setFontAlign(0,0);
@@ -12,6 +13,9 @@ baro.draw = function draw(x,y,Radius, Settings) {
     dpsign = (dp<0?"":"+") + dp;
     Text = ''+p+dpsign+"Hp";
     g.drawString(Text, x,y);
+    } catch (error) {
+        console.error(error)
+    }
 };
 
 sunrise = {};
@@ -96,7 +100,7 @@ Clockwork.windUp({
     complications: {
         l:sunrise.whichevent('sunrise'),
         r:sunrise.whichevent('sunset'),
-        t:tide,
-        b:baro
+        t:tide
+        // b:baro
     }
 }, {'Foreground':'Theme', 'Background':'Theme'});
