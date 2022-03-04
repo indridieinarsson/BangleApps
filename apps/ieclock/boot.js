@@ -14,7 +14,7 @@ function updateSunRiseSunSet(){
 function updateTide() {
     nowT=Date().getTime();
     f = require("Storage").read(ieclock.TIDE_FILE);
-    f=f.split("\n");
+    f=f.split(";");
     for (ix in f)
     {
         e = f[ix].split(",");

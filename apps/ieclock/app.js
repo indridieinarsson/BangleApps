@@ -23,6 +23,7 @@ sunrise.compactTime = function(t) {
 
 tide = {};
 tide.draw = function(x, y, Radius, Settings) {
+    console.log("x "+x+" y "+y+" r "+Radius+ " Settings "+Settings);
     auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
     let halfScreenWidth   = g.getWidth() / 2;
     let largeComplication = (x === halfScreenWidth);
@@ -35,7 +36,7 @@ tide.draw = function(x, y, Radius, Settings) {
         g.setFont('Vector', 16);
         g.setFontAlign(0,0);
         Text = ''+ieclock.tides.height.toFixed(1);
-        g.drawString(Text, x,y);
+        g.drawString(Text, x, y);
     }
 }
 
