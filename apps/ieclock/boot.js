@@ -24,11 +24,12 @@ function updateTide() {
             break;
         }
     }
+    th = Math.round(parseInt(e[1])/10)/10;
     ieclock.tides = {
         'time': Date(parseInt(e[0])),
         'timestamp':parseInt(e[0]),
         'e':e,
-        'height':parseInt(e[1])/100.0,
+        'height': th,
         'high':  (e[2]=='true'?true:false)
     }
 }
