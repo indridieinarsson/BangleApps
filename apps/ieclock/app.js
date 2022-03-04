@@ -4,8 +4,6 @@
 // 3/4 : String.fromCharCode(190)
 baro = {};
 baro.draw = function draw(x,y,Radius, Settings) {
-    let halfScreenWidth   = g.getWidth() / 2;
-    let largeComplication = (x === halfScreenWidth);
     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
     g.setFont('Vector', 18);
     g.setFontAlign(0,0);
@@ -23,12 +21,42 @@ sunrise.compactTime = function(t) {
     return ''+t.getHours()+this.quarters[Math.round(t.getMinutes()/15)];
 };
 
+tide = {};
+tide.draw = function() {
+    auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
+    let halfScreenWidth   = g.getWidth() / 2;
+    let largeComplication = (x === halfScreenWidth);
+    let rmult = (largeComplication?1.65:1.3)
+    let h = ieclock.tides.time.getHours()
+    let m = ieclock.tides.time.getMinutes()
+    auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h ,m , true);
+    if (largeComplication){
+        g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
+        g.setFont('Vector', 16);
+        g.setFontAlign(0,0);
+        Text = ''+ieclock.tides.height.toFixed(1);
+        g.drawString(Text, x,y);
+    }
+}
+
+// tideheight = {};
+// tideheight.draw = function() {
+//     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
+//     g.setFont('Vector', 18);
+//     g.setFontAlign(0,0);
+//     Text = ''+ieclock.tides.height+'m';
+//     g.drawString(Text, x,y);
+// }
+
 function drawEvent(ev, x, y, Radius, Settings) {
+    let halfScreenWidth   = g.getWidth() / 2;
+    let largeComplication = (x === halfScreenWidth);
+    let rmult = (largeComplication?1.65:1.3)
     auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
     let h = ieclock[ev].getHours()
     let m = ieclock[ev].getMinutes()
-    auxdial.draw(Settings, x, y, Math.round(Radius*1.25),h ,m , true);
+    auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h ,m , true);
 }
 
 sunrise.draw = drawEvent.bind(this, 'sunrise');
@@ -49,7 +77,7 @@ Clockwork.windUp({
     complications: {
         l:sunrise.whichevent('sunrise'),
         r:sunrise.whichevent('sunset'),
-        tl:sunrise.whichevent('sunset'),
+        t:tide,
         b:baro
     }
 }, {'Foreground':'Theme', 'Background':'Theme'});
