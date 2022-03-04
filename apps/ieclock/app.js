@@ -42,12 +42,13 @@ tide.draw = function(x, y, Radius, Settings) {
         let th = ieclock.tides.height;
         let t1=th.toFixed(0);
         let t2=((Math.abs(th)%1)*10).toFixed();
+        g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
         g.setFont('Vector',16);
         g.setFontAlign(1,1);
-        g.drawString(t1,x,y);
+        g.drawString(t1,x+8,y+8);
         g.setFont('Vector',12);
         g.setFontAlign(0,0);
-        g.drawString(t2,x,y);
+        g.drawString(t2,x+8,y+8);
     }
     // let Text = this.compactTime(ieclock.tides.time);
     // if (largeComplication){
