@@ -130,11 +130,9 @@
             changeInterval(intervalId, ms); // update every 0.1 minutes
         }
     }
-    initFromFile();
-    newInterval(5*60*1000);
-    E.on('kill', WIDGETS.widbarom.saveData);
 
     function saveData () {
+        clearInterval(intervalId);
         console.log("Saving data");
         console.log("times end ", times[buflen]);
         console.log("Now write pressure data:");
@@ -158,5 +156,9 @@
         getAllTimes: getAllTimes,
         saveData: saveData
     };
+
+    initFromFile();
+    newInterval(5*60*1000);
+    E.on('kill', saveData);
 })()
 //Bangle.drawWidgets(); // <-- for development only
