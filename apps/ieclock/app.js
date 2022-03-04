@@ -2,21 +2,21 @@
 // 1/4 : String.fromCharCode(188)
 // 2/4 : String.fromCharCode(189)
 // 3/4 : String.fromCharCode(190)
-baro = {};
-baro.draw = function draw(x,y,Radius, Settings) {
-    try {
-    g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
-    g.setFont('Vector', 18);
-    g.setFontAlign(0,0);
-    dp = Math.round(WIDGETS.widbarom.getChange() * 10) / 10;
-    p = Math.round(WIDGETS.widbarom.getLastPressure().pressure);
-    dpsign = (dp<0?"":"+") + dp;
-    Text = ''+p+dpsign+"Hp";
-    g.drawString(Text, x,y);
-    } catch (error) {
-        console.error(error)
-    }
-};
+// baro = {};
+// baro.draw = function draw(x,y,Radius, Settings) {
+//     try {
+//         g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
+//         g.setFont('Vector', 18);
+//         g.setFontAlign(0,0);
+//         dp = Math.round(WIDGETS.widbarom.getChange() * 10) / 10;
+//         p = Math.round(WIDGETS.widbarom.getLastPressure().pressure);
+//         dpsign = (dp<0?"":"+") + dp;
+//         Text = ''+p+dpsign+"Hp";
+//         g.drawString(Text, x,y);
+//     } catch (error) {
+//         console.error(error)
+//     }
+// };
 
 sunrise = {};
 sunrise.quarters = [0, String.fromCharCode(188), String.fromCharCode(189), String.fromCharCode(190), 0];
@@ -39,6 +39,18 @@ tide.draw = function(x, y, Radius, Settings) {
     let largeComplication = (x === halfScreenWidth);
     auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
     let rmult = (largeComplication?1.7:1.3)
+    if (typeof ieclock == 'undefined')
+    {
+        return;
+    }
+    if (typeof ieclock.tides == 'undefined')
+    {
+        return;
+    }
+    if (typeof ieclock.tides.height == 'undefined' || typeof ieclock.tides.time == 'undefined' )
+    {
+        return;
+    }
     let h = ieclock.tides.time.getHours()
     let m = ieclock.tides.time.getMinutes()
     auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h ,m , true);

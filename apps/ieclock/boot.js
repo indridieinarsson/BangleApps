@@ -14,15 +14,21 @@ function updateSunRiseSunSet(){
 function updateTide() {
     nowT=Date().getTime();
     f = require("Storage").read(ieclock.TIDE_FILE);
+    if (typeof f == 'undefined'){
+        return;
+    }
     f=f.split(";");
     for (ix in f)
     {
         e = f[ix].split(",");
         t = e[0];
         if(t > nowT){
-            tideinfo = e;
+            let tideinfo = e;
             break;
         }
+    }
+    if (typeof tideinfo == 'undefined'){
+        return;
     }
     th = Math.round(parseInt(e[1])/10)/10;
     ieclock.tides = {
