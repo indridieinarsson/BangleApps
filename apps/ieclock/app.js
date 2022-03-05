@@ -2,21 +2,21 @@
 // 1/4 : String.fromCharCode(188)
 // 2/4 : String.fromCharCode(189)
 // 3/4 : String.fromCharCode(190)
-// baro = {};
-// baro.draw = function draw(x,y,Radius, Settings) {
-//     try {
-//         g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
-//         g.setFont('Vector', 18);
-//         g.setFontAlign(0,0);
-//         dp = Math.round(WIDGETS.widbarom.getChange() * 10) / 10;
-//         p = Math.round(WIDGETS.widbarom.getLastPressure().pressure);
-//         dpsign = (dp<0?"":"+") + dp;
-//         Text = ''+p+dpsign+"Hp";
-//         g.drawString(Text, x,y);
-//     } catch (error) {
-//         console.error(error)
-//     }
-// };
+baro = {};
+baro.draw = function draw(x,y,Radius, Settings) {
+    try {
+        g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
+        g.setFont('Vector', 18);
+        g.setFontAlign(0,0);
+        dp = Math.round(WIDGETS.widbarom.getChange() * 10) / 10;
+        p = Math.round(WIDGETS.widbarom.getLastPressure().pressure);
+        dpsign = (dp<0?"":"+") + dp;
+        Text = ''+p+dpsign+"Hp";
+        g.drawString(Text, x,y);
+    } catch (error) {
+        console.error(error)
+    }
+};
 
 sunrise = {};
 sunrise.quarters = [0, String.fromCharCode(188), String.fromCharCode(189), String.fromCharCode(190), 0];
@@ -112,7 +112,7 @@ Clockwork.windUp({
     complications: {
         l:sunrise.whichevent('sunrise'),
         r:sunrise.whichevent('sunset'),
-        t:tide
-        // b:baro
+        t:tide,
+        b:baro
     }
 }, {'Foreground':'Theme', 'Background':'Theme'});
