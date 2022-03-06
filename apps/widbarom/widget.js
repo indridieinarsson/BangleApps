@@ -7,6 +7,8 @@
     var pressures=Float32Array(buflen);
     var times=Uint32Array(buflen+1); 
     var retries=0;
+    var last=-1;
+    var llast=-1;
 
     function initFromFile() {
         let fnamet='widbarom.tdata.bin';
@@ -58,14 +60,18 @@
                 retries = 0;
                 console.log("got barometer data " + data.pressure);
                 console.log("Head : "+head + "  buflen :" + buflen);
+                if (last==-1){last = data.pressure;}
+                if (llast==-1){llast = data.pressure;}
                 //lastPressure = currentPressure;
                 //currentPressure={'time':Math.round(Date().getTime()/10000), 'pressure':  data.pressure};
-                pressures[head] = data.pressure;
+                pressures[head] = [last, llast, data.pressure].sort(function(a, b) {return a - b;})[1];
                 times[head] = Math.round(Date().getTime()/10000);
                 head++;
                 if (head >= buflen){ head=0; }
                 Bangle.setBarometerPower(false);
                 times[buflen]=head;
+                llast=last;
+                last=data.pressure;
             }
         }
         Bangle.setBarometerPower(true);
@@ -105,7 +111,7 @@
                 break;
             }
             tail=tailtmp;
-            if ((tlast-times[tail])>359)
+            if ((tlast-times[tail])>(359*3))
             {
                 dt = (tlast-times[tail])/360;
                 dp = pressures[lastix]-pressures[tail];
@@ -158,7 +164,7 @@
     };
 
     initFromFile();
-    newInterval(5*60*1000);
+    newInterval(10*60*1000);
     E.on('kill', saveData);
 })()
 //Bangle.drawWidgets(); // <-- for development only
