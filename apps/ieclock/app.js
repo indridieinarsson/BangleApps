@@ -8,7 +8,7 @@ baro.draw = function draw(x,y,Radius, Settings) {
         g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
         g.setFont('Vector', 18);
         g.setFontAlign(0,0);
-        dp = Math.round(WIDGETS.widbarom.getChange() * 10) / 10;
+        dp = WIDGETS.widbarom.getChange().toFixed(1) ;
         p = Math.round(WIDGETS.widbarom.getLastPressure().pressure);
         dpsign = (dp<0?"":"+") + dp;
         Text = ''+p+dpsign+"Hp";

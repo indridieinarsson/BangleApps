@@ -102,7 +102,7 @@
             let tailtmp=stepBack(tail);
             if (times[tailtmp]==0)
             {
-                dt = (tlast-times[tail])/360;
+                dt = (tlast-times[tail])/(3*360);
                 dp = pressures[lastix]-pressures[tail];
                 if (dt==0){
                     return 0;
@@ -113,7 +113,7 @@
             tail=tailtmp;
             if ((tlast-times[tail])>(359*3))
             {
-                dt = (tlast-times[tail])/360;
+                dt = (tlast-times[tail])/(3*360);
                 dp = pressures[lastix]-pressures[tail];
                 if (dt==0){
                     return 0;
