@@ -24,9 +24,9 @@ baro2 = {};
 baro2.ClockSize = ClockSize;
 baro2.draw = function draw(x,y,Radius, Settings){
     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
-    cx = this.ClockSize.getCenterX();
-    cy = this.ClockSize.getCenterY();
-    rad = this.ClockSize.getOuterRadius();
+    cx = this.ClockSize.CenterX();
+    cy = this.ClockSize.CenterY();
+    rad = this.ClockSize.OuterRadius();
     halfdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/halfdial.js");
     halfdial.draw(Settings, cx, cy, rad-10, 0.4);
 }
