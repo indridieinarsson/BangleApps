@@ -18,6 +18,20 @@ baro.draw = function draw(x,y,Radius, Settings) {
     }
 };
 
+
+let ClockSize = require('https://raw.githubusercontent.com/rozek/banglejs-2-smart-clock-size/main/ClockSize.js')
+baro2 = {};
+baro2.ClockSize = ClockSize;
+baro2.draw = function draw(x,y,Radius, Settings){
+    g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
+    cx = this.ClockSize.getCenterX();
+    cy = this.ClockSize.getCenterY();
+    rad = this.ClockSize.getOuterRadius();
+    halfdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/halfdial.js");
+    halfdial.draw(Settings, cx, cy, rad-10, 0.4);
+}
+
+
 sunrise = {};
 sunrise.quarters = [0, String.fromCharCode(188), String.fromCharCode(189), String.fromCharCode(190), 0];
 
@@ -107,12 +121,12 @@ let Clockwork = require('https://raw.githubusercontent.com/rozek/banglejs-2-simp
 
 Clockwork.windUp({
     face:require('https://raw.githubusercontent.com/rozek/banglejs-2-twelve-numbered-clock-face/main/ClockFace.js'),
-    size: require('https://raw.githubusercontent.com/rozek/banglejs-2-smart-clock-size/main/ClockSize.js'),
+    size:ClockSize,
     hands: require('https://raw.githubusercontent.com/rozek/banglejs-2-hollow-clock-hands/main/ClockHands.js'),
     complications: {
         l:sunrise.whichevent('sunrise'),
         r:sunrise.whichevent('sunset'),
         t:tide,
-        b:baro
+        b:baro2
     }
 }, {'Foreground':'Theme', 'Background':'Theme'});

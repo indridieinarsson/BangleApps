@@ -1,7 +1,7 @@
 {
   "id": "widbarom",
   "name": "Barometer widget",
-  "version": "0.28",
+  "version": "0.29",
   "description": "Barometer widget",
   "icon": "widget.png",
   "type": "widget",

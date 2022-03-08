@@ -34,6 +34,19 @@
         return (tail==0?buflen-1:tail-1);
     }
 
+    function zeroBaseData(){
+        var newP=Float32Array(buflen);
+        var newT=Uint32Array(buflen); 
+        var tmpHead = head;
+        for (let i=0; i<buflen; i++){
+            newP[i] = pressures[tmpHead];
+            newT[i] = times[tmpHead];
+            tmpHead++;
+            if (tmpHead >= buflen){ tmpHead=0; }
+        }
+        return {'time': newT, 'pressure':newP}
+    }
+
     function updateData() {
         function baroHandler(data) {
             if (data===undefined){ // workaround for https://github.com/espruino/BangleApps/issues/1429
@@ -48,8 +61,8 @@
                     retries=0;
                 }
             }
-            else if (data.pressure==0){
-                console.log("barometer data 0");
+            else if (data.pressure<500 || data.pressure>1200){
+                console.log("barometer data out of bounds");
                 Bangle.setBarometerPower(false);
                 retries=0;
                 return;
@@ -160,7 +173,8 @@
         newInterval: newInterval,
         getAllPressures: getAllPressures,
         getAllTimes: getAllTimes,
-        saveData: saveData
+        saveData: saveData,
+        zeroBaseData: zeroBaseData
     };
 
     initFromFile();
