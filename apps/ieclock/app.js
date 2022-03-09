@@ -33,7 +33,7 @@ baro2.draw = function draw(x,y,Radius, Settings){
     halfdial.draw(Settings, cx, cy, rad-20, k);
     dp = WIDGETS.widbarom.getChange().toFixed(1);
     dpsign = (dp<0?"":"+") + dp;
-    Text = ''dpsign+"Hp";
+    Text = ''+dpsign+"Hp";
     g.drawString(Text, x,y);
 }
 
