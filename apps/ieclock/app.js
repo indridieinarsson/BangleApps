@@ -30,11 +30,20 @@ baro2.draw = function draw(x,y,Radius, Settings){
     halfdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/halfdial.js");
     p = Math.round(WIDGETS.widbarom.getLastPressure().pressure);
     k=(p-950)/100;
-    halfdial.draw(Settings, cx, cy, rad-20, k);
+    halfdial.draw(Settings, cx, cy, rad-27, k);
     dp = WIDGETS.widbarom.getChange().toFixed(1);
-    dpsign = (dp<0?"":"+") + dp;
-    Text = ''+dpsign+"Hp";
-    g.drawString(Text, x,y);
+    let t1=dp.toFixed(0);
+    let t2=((Math.abs(dp)%1)*10).toFixed();
+    g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
+    g.setFont('Vector',16);
+    g.setFontAlign(1,1);
+    g.drawString((t1<0?"":"+") + t1,x+8,y+8);
+    g.setFont('Vector',12);
+    g.setFontAlign(0,0);
+    g.drawString(t2,x+8,y+8);
+    // dpsign = (dp<0?"":"+") + dp;
+    // Text = ''+dpsign+"Hp";
+    // g.drawString(Text, x,y);
 }
 
 
