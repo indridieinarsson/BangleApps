@@ -31,7 +31,7 @@ baro2.draw = function draw(x,y,Radius, Settings){
     p = Math.round(WIDGETS.widbarom.getLastPressure().pressure);
     k=(p-950)/100;
     halfdial.draw(Settings, cx, cy, rad-27, k);
-    dp = WIDGETS.widbarom.getChange().toFixed(1);
+    dp = WIDGETS.widbarom.getChange();
     let t1=dp.toFixed(0);
     let t2=((Math.abs(dp)%1)*10).toFixed();
     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
