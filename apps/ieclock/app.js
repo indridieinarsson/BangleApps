@@ -28,7 +28,13 @@ baro2.draw = function draw(x,y,Radius, Settings){
     cy = this.ClockSize.CenterY();
     rad = this.ClockSize.outerRadius();
     halfdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/halfdial.js");
-    halfdial.draw(Settings, cx, cy, rad-10, 0.4);
+    p = Math.round(WIDGETS.widbarom.getLastPressure().pressure);
+    k=(p-950)/100;
+    halfdial.draw(Settings, cx, cy, rad-20, k);
+    dp = WIDGETS.widbarom.getChange().toFixed(1);
+    dpsign = (dp<0?"":"+") + dp;
+    Text = ''dpsign+"Hp";
+    g.drawString(Text, x,y);
 }
 
 
