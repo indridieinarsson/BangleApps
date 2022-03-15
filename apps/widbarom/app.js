@@ -1,7 +1,7 @@
-var data = WIDGETS.widbarom.zeroBaseData();
 g.clear();
 Bangle.loadWidgets();
 Bangle.drawWidgets();
+var data = WIDGETS.widbarom.zeroBaseData();
 require("graph.js").drawLine(g, data.pressure, 
                              {x:4, y: 24,
                               height: g.getHeight()-(24+8),
