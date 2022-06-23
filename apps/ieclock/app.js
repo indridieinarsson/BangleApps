@@ -2,6 +2,11 @@
 // 1/4 : String.fromCharCode(188)
 // 2/4 : String.fromCharCode(189)
 // 3/4 : String.fromCharCode(190)
+//
+function log_debug(o) {
+  //print(o);
+}
+
 baro = {};
 baro.draw = function draw(x,y,Radius, Settings) {
     try {
@@ -63,7 +68,7 @@ tide.compactTime = function(t) {
 };
 
 tide.draw = function(x, y, Radius, Settings) {
-    console.log("x "+x+" y "+y+" r "+Radius+ " Settings "+Settings);
+    log_debug("x "+x+" y "+y+" r "+Radius+ " Settings "+Settings);
     let halfScreenWidth   = g.getWidth() / 2;
     let largeComplication = (x === halfScreenWidth);
     auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
