@@ -34,11 +34,11 @@ var oldHeading = 0;
 Bangle.on('mag', function(m) {
   if (!Bangle.isLCDOn()) return;
   g.reset();
-  if (isNaN(m.heading)) {
+  if (isNaN(m.heading)) {    
     if (!wasUncalibrated) {
       g.clearRect(0,24,W,48);
       g.setFontAlign(0,-1).setFont("6x8");
-      g.drawString("Uncalibrated\nturn 360° around",M,24+4);
+      g.drawString(/*LANG*/"Uncalibrated\nturn 360° around",M,24+4);
       wasUncalibrated = true;
     }
   } else {
@@ -49,7 +49,7 @@ Bangle.on('mag', function(m) {
     g.setFontAlign(0,0).setFont("6x8",3);
     var y = 36;
     g.clearRect(M-40,24,M+40,48);
-    g.drawString(Math.round(m.heading),M,y,true);
+    g.drawString(Math.round(360-m.heading),M,y,true);
   }
 
 
@@ -64,7 +64,12 @@ Bangle.on('mag', function(m) {
   oldHeading = m.heading;
 });
 
-g.clear();
+g.clear(1);
+g.setFont("6x8").setFontAlign(0,0,3).drawString(/*LANG*/"RESET", g.getWidth()-5, g.getHeight()/2);
+setWatch(function() {
+  Bangle.resetCompass();
+}, (process.env.HWVERSION==2) ? BTN1 : BTN2, {repeat:true});
+
 Bangle.loadWidgets();
 Bangle.drawWidgets();
 Bangle.setCompassPower(1);

@@ -33,7 +33,7 @@ done    "heatshrink": "readonly",
         "Math": "readonly",
         "Modules": "readonly",
         "NRF": "readonly",
-        "Number": "readonly", 
+        "Number": "readonly",
         "Object": "readonly",
         "OneWire": "readonly",
         "Pin": "readonly",
@@ -140,7 +140,7 @@ declare const require: ((module: 'heatshrink') => {
 
 declare const Bangle: {
   // functions
-  buzz: () => void;
+  buzz: (duration?: number, intensity?: number) => Promise<void>;
   drawWidgets: () => void;
   isCharging: () => boolean;
   // events
@@ -158,9 +158,9 @@ declare type Image = {
 };
 
 declare type GraphicsApi = {
-  reset: () => void;
+  reset: () => GraphicsApi;
   flip: () => void;
-  setColor: (color: string) => void; // TODO we can most likely type color more usefully than this
+  setColor: (color: string) => GraphicsApi; // TODO we can most likely type color more usefully than this
   drawImage: (
     image: string | Image | ArrayBuffer,
     xOffset: number,
@@ -169,15 +169,16 @@ declare type GraphicsApi = {
       rotate?: number;
       scale?: number;
     }
-  ) => void;
+  ) => GraphicsApi;
   // TODO add more
 };
 
 declare const Graphics: GraphicsApi;
 declare const g: GraphicsApi;
 
+type WidgetArea = 'tl' | 'tr' | 'bl' | 'br';
 declare type Widget = {
-  area: 'tr' | 'tl';
+  area: WidgetArea;
   width: number;
   draw: (this: { x: number; y: number }) => void;
 };
