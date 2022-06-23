@@ -10,7 +10,7 @@
     var last=-1;
     var llast=-1;
     function log_debug(o) {
-	    //print(o);
+        //print(o);
     }
 
     function initFromFile() {
@@ -124,7 +124,6 @@
                     return 0;
                 }
                 return dp/dt;
-                break;
             }
             tail=tailtmp;
             if ((tlast-times[tail])>(359*3))
@@ -135,7 +134,6 @@
                     return 0;
                 }
                 return dp/dt;
-                break;
             } 
         }
     }
