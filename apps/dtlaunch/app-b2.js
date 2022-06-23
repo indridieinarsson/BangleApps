@@ -6,7 +6,8 @@ var settings = Object.assign({
   showClocks: true,
   showLaunchers: true,
   direct: false,
-  oneClickExit:false
+  oneClickExit:false,
+  swipeExit: false
 }, require('Storage').readJSON("dtlaunch.json", true) || {});
 
 if( settings.oneClickExit)
@@ -85,16 +86,17 @@ function drawPage(p){
     g.flip();
 }
 
-Bangle.on("swipe",(dir)=>{
+Bangle.on("swipe",(dirLeftRight, dirUpDown)=>{
     selected = 0;
     oldselected=-1;
-    if (dir<0){
+    if(settings.swipeExit && dirLeftRight==1) load();
+    if (dirUpDown==-1||dirLeftRight==-1){
         ++page; if (page>maxPage) page=0;
         drawPage(page);
-    } else {
+    } else if (dirUpDown==1||(dirLeftRight==1 && !settings.swipeExit)){
         --page; if (page<0) page=maxPage;
         drawPage(page);
-    }  
+    }
 });
 
 function isTouched(p,n){
