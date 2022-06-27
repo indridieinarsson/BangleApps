@@ -25,6 +25,14 @@ function log_debug(o) {
   //print(o);
 }
 
+var cloudIcon = require("heatshrink").decompress(atob("kEggIfcj+AAYM/8ADBuFwAYPAmADCCAMBwEf8ADBhFwg4aBnEPAYMYjAVBhgDDDoQDHCYc4jwDB+EP///FYIDBMTgA=="));
+var sunIcon = require("heatshrink").decompress(atob("kEggILIgOAAZkDAYPAgeBwPAgIFBBgPhw4TBp/yAYMcnADBnEcAYMwhgDBsEGgE/AYP8AYYLDCYgbDEYYrD8fHIwI7CIYZLDL54AHA=="));
+var sunPartIcon = require("heatshrink").decompress(atob("kEggIHEmADJjEwsEAjkw8EAh0B4EAg35wEAgP+CYMDwv8AYMDBAP2g8HgH+g0DBYMMgPwAYX8gOMEwMG3kAg8OvgSBjg2BgcYGQIcBAY5CBg0Av//HAM///4MYgNBEIMOCoUMDoUAnBwGkEA"));
+var snowIcon = require("heatshrink").decompress(atob("kEggITQj/AAYM98ADBsEwAYPAjADCj+AgOAj/gAYMIuEHwEAjEPAYQVChk4AYQhCAYcYBYQTDnEPgEB+EH///IAQACE4IAB8EICIPghwDB4EeBYNAjgDBg8EAYQYCg4bCgZuFA=="));
+var rainIcon = require("heatshrink").decompress(atob("kEggIPMh+AAYM/8ADBuFwAYPgmADB4EbAYOAj/ggOAhnwg4aBnAeCjEcCIMMjADCDoQDHjAPCnAXCuEP///8EDAYJECAAXBwkAgPDhwDBwUMgEEhkggEOjFgFgMQLYQAOA=="));
+var errIcon = require("heatshrink").decompress(atob("kEggILIgOAAYsD4ADBg/gAYMGsADBhkwAYsYjADCjgDBmEMAYNxxwDBsOGAYPBwYDEgOBwOAgYDB4EDHYPAgwDBsADDhgDBFIcwjAHBjE4AYMcmADBhhNCKIcG/4AGOw4A=="));
+
+
 var hrmImg = require("heatshrink").decompress(atob("i0WgIKHgPh8Ef5/g///44CBz///1///5A4PnBQk///wA4PBA4MDA4MH/+Ah/8gEP4EAjw0GA"));
 
 // https://www.1001fonts.com/rounded-fonts.html?page=3
@@ -193,6 +201,49 @@ function draw() {
   queueDraw();
 }
 
+/**
+Choose weather icon to display based on condition.
+Based on function from the Bangle weather app so it should handle all of the conditions
+sent from gadget bridge.
+*/
+function chooseIcon(condition) {
+  condition = condition.toLowerCase();
+  if (condition.includes("thunderstorm")) return stormIcon;
+  if (condition.includes("freezing")||condition.includes("snow")||
+    condition.includes("sleet")) {
+    return snowIcon;
+  }
+  if (condition.includes("drizzle")||
+    condition.includes("shower")) {
+    return rainIcon;
+  }
+  if (condition.includes("rain")) return rainIcon;
+  if (condition.includes("clear")) return sunIcon;
+  if (condition.includes("few clouds")) return partSunIcon;
+  if (condition.includes("scattered clouds")) return cloudIcon;
+  if (condition.includes("clouds")) return cloudIcon;
+  if (condition.includes("mist") ||
+    condition.includes("smoke") ||
+    condition.includes("haze") ||
+    condition.includes("sand") ||
+    condition.includes("dust") ||
+    condition.includes("fog") ||
+    condition.includes("ash") ||
+    condition.includes("squalls") ||
+    condition.includes("tornado")) {
+    return cloudIcon;
+  }
+  return cloudIcon;
+}
+
+/**
+Get weather stored in json file by weather app.
+*/
+function getWeather() {
+  let jsonWeather = storage.readJSON('weather.json');
+  return jsonWeather;
+}
+
 function drawClock() {
   var date = new Date();
   var timeStr = require("locale").time(date,1);
@@ -202,6 +253,25 @@ function drawClock() {
   var mm = da[4].substr(3,2);
   var steps = getSteps();
   var p_steps = Math.round(100*(steps/10000));
+
+
+  var weatherJson = getWeather();
+  var w_temp;
+  var w_icon;
+  var w_wind;
+  //if (settings.weather && weatherJson && weatherJson.weather) {
+  if (true && weatherJson && weatherJson.weather) {
+      var currentWeather = weatherJson.weather;
+      const temp = locale.temp(currentWeather.temp-273.15).match(/^(\D*\d*)(.*)$/);
+      w_temp = temp[1] + " " + temp[2];
+      w_icon = chooseIcon(currentWeather.txt);
+      const wind = locale.speed(currentWeather.wind).match(/^(\D*\d*)(.*)$/);
+      w_wind = wind[1] + " " + wind[2] + " " + (currentWeather.wrose||'').toUpperCase();
+  } else {
+      w_temp = "Err";
+      w_wind = "???";
+      w_icon = errIcon;
+  }
   
   g.reset();
   g.setColor(g.theme.bg);
@@ -217,6 +287,18 @@ function drawClock() {
   g.setFontAlign(-1,0); // left aligned
   g.drawString(mm, (w/2) + 1, h/2);
 
+  // draw weather line
+  //if (settings.weather) {
+  if (true) {
+    g.drawImage(w_icon, (w/2) - 40, 24);
+    setSmallFont();
+    g.setFontAlign(-1,0); // left aligned
+    if (drawCount % 2 == 0)
+      g.drawString(w_temp, (w/2) + 6, 24 + ((y - 24)/2));
+    else
+      g.drawString( (w_wind.split(' ').slice(0, 2).join(' ')), (w/2) + 6, 24 + ((y - 24)/2));
+  // display first 2 words of the wind string eg '4 mph'
+  }
   drawInfo();
   
   // recalc sunrise / sunset every hour
