@@ -259,6 +259,8 @@ function drawClock() {
   var w_temp;
   var w_icon;
   var w_wind;
+  var x = (g.getWidth()/2);
+  var y = (g.getHeight()/3);
   //if (settings.weather && weatherJson && weatherJson.weather) {
   if (true && weatherJson && weatherJson.weather) {
       var currentWeather = weatherJson.weather;
