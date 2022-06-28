@@ -264,11 +264,13 @@ function drawClock() {
   //if (settings.weather && weatherJson && weatherJson.weather) {
   if (true && weatherJson && weatherJson.weather) {
       var currentWeather = weatherJson.weather;
-      const temp = locale.temp(currentWeather.temp-273.15).match(/^(\D*\d*)(.*)$/);
+      const temp = locale.temp(currentWeather.temp-273.15,0).match(/^(\D*\d*)(.*)$/);
       w_temp = temp[1] + " " + temp[2];
       w_icon = chooseIcon(currentWeather.txt);
-      const wind = locale.speed(currentWeather.wind).match(/^(\D*\d*)(.*)$/);
-      w_wind = wind[1] + " " + wind[2] + " " + (currentWeather.wrose||'').toUpperCase();
+      //const wind = locale.speed(currentWeather.wind).match(/^(\D*\d*)(.*)$/);
+      // const wind = ''+Math.round(currentWeather.wind*5/18.0)+" m/s";
+      // w_wind = wind[1] + " " + wind[2] + " " + (currentWeather.wrose||'').toUpperCase();
+      w_wind = ''+Math.round(currentWeather.wind*5/18.0)+" m/s";
   } else {
       w_temp = "Err";
       w_wind = "???";
