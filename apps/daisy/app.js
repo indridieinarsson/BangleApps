@@ -121,6 +121,8 @@ function drawGauge(perc){
         r_rects.push([it[0], h-th-2, it[1], h]);
     });
 
+    r_rects.reverse()
+
     l_rects=[];
     l_intervals.forEach(it => {
         l_rects.push([it[0], 0, it[1], th]);
@@ -134,9 +136,9 @@ function drawGauge(perc){
         l_rects.push([it[0], h-th-2, it[1], h]);
     });
 
-    if (a<tarcnr) {use=theme_dark;} else {use=theme_bright;}
-    topright(use);
     if (a<barcnr) {use=theme_dark;} else {use=theme_bright;}
+    topright(use);
+    if (a<tarcnr) {use=theme_dark;} else {use=theme_bright;}
     bottomright(use);
     topleft(theme_dark);
     bottomleft(theme_dark);
@@ -151,8 +153,10 @@ function drawGauge(perc){
         g.fillRect(it[0],it[1],it[2],it[3]);
     }
                    );
+
+    g.setColor(theme_dark);
     l_rects.forEach((it,index) => {
-        if (index >= a) {g.setColor(theme_dark);}
+        //if (index >= a) {g.setColor(theme_dark);}
         g.fillRect(it[0],it[1],it[2],it[3]);
     }
                    );
