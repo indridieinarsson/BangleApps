@@ -5,7 +5,7 @@ const SETTINGS_FILE = "daisy.json";
 const LOCATION_FILE = "mylocation.json";
 const h = g.getHeight();
 const w = g.getWidth();
-const rad = 8;
+const rad = 16;
 const th = 3;
 const bl = Math.round(0.5*Math.PI*rad);
 const halflength = (w/2-rad) + bl + (h-rad-rad) + bl + (w/2-rad);
@@ -133,18 +133,12 @@ function drawGauge(){
         l_rects.push([it[0], h-th-2, it[1], h]);
     });
 
-
-    g.setColor(theme_dark);
-    rtop = a<tarcnr;
-    if (rtop) {g.setColor(theme_dark);} else {g.setColor(theme_bright);}
-    topright();
-    rbot = a<barcnr;
-    if (rbot) {g.setColor(theme_dark);} else {g.setColor(theme_bright);}
-    bottomright();
-    g.setColor(theme_dark);
-    topleft();
-    g.setColor(theme_dark);
-    bottomleft();
+    if (a<tarcnr) {use=theme_dark;} else {use=theme_bright;}
+    topright(use);
+    if (a<barcnr) {use=theme_dark;} else {use=theme_bright;}
+    bottomright(use);
+    topleft(theme_dark);
+    bottomleft(theme_dark);
     // fill rest of center
     g.setColor(g.theme.bg);
     g.fillRect(0+rad,0,     w-rad-2,h);
