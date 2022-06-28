@@ -87,10 +87,9 @@ function bottomright(color){
     thickring(w-rad-2,h-rad-2, rad, th, color);
 }
 
-function drawGauge(){
+function drawGauge(perc){
     // g.setColor(g.theme.fg);
     // bogalengd : 2*pi*rad/4 = 
-    nrtofind = 160; // TODO
     tarcnr = n_hbl;
     barcnr = tarcnr + n_bl+1;
 
@@ -102,6 +101,8 @@ function drawGauge(){
     l = w-2*rad-2
     intervals = nrs.map(x => [rad+Math.round(x*l/n_bl), rad+Math.round((x+1)*l/n_bl)]);
     cumsum_all = get_cumlength(l, n_bl, nrs);
+    maxPixels=cumsum_all[cumsum_all.length - 1];
+    nrtofind = Math.round(perc*maxPixels/100);
     a = find_split_segment(cumsum_all, nrtofind);
     r_intervals = intervals.slice(n_hbl, n_bl);
     l_intervals = intervals.slice(0, n_hbl);
@@ -413,7 +414,7 @@ function drawClock() {
   g.reset();
   g.setColor(g.theme.bg);
   g.fillRect(0, 0, w, h);
-  drawGauge();
+  drawGauge(p_steps);
   //g.drawImage(getGaugeImage(p_steps), 0, 0);
   setLargeFont();
 
