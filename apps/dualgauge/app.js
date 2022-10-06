@@ -41,6 +41,7 @@ function find_split_segment(csseg, nrtf){
             return i;
         }
     }
+    return csseg.length;
 }
 
 function cumsum(segs) {
@@ -59,7 +60,7 @@ function cumsum(segs) {
 // construct length of all segments:
 function get_cumlength(l, n_bl, nrs){
     lengths = nrs.map(x => Math.round((x+1)*l/n_bl) - Math.round(x*l/n_bl));
-    all_lengths = []
+    all_lengths = [];
     all_lengths=all_lengths.concat(lengths.slice(n_hbl,n_bl));
     all_lengths.push(bl);
     all_lengths=all_lengths.concat(lengths);
@@ -87,7 +88,8 @@ function bottomright(color){
     thickring(w-rad-2,h-rad-2, rad, th, color);
 }
 
-function drawGauge(perc){
+
+function drawGauge(percL, percR){
     // g.setColor(g.theme.fg);
     // bogalengd : 2*pi*rad/4 = 
     tarcnr = n_hbl;
@@ -98,18 +100,22 @@ function drawGauge(perc){
         nrs.push(i);
     }
 
-    l = w-2*rad-2
+    l = w-2*rad-2;
     intervals = nrs.map(x => [rad+Math.round(x*l/n_bl), rad+Math.round((x+1)*l/n_bl)]);
     cumsum_all = get_cumlength(l, n_bl, nrs);
     maxPixels=cumsum_all[cumsum_all.length - 1];
-    nrtofind = Math.round(perc*maxPixels/100);
-    a = find_split_segment(cumsum_all, nrtofind);
+    nrtofindR = Math.round(percR*maxPixels/100);
+    gaugePosR = find_split_segment(cumsum_all, nrtofindR);
+
+    nrtofindL = Math.round(percL*maxPixels/100);
+    gaugePosL = find_split_segment(cumsum_all, nrtofindL);
+
     r_intervals = intervals.slice(n_hbl, n_bl);
     l_intervals = intervals.slice(0, n_hbl);
     r_rects=[];
 
     r_intervals.forEach(it => {
-        tmp=[it[0], 0, it[1], th]
+        tmp=[it[0], 0, it[1], th];
         r_rects.push(tmp);
     });
     // Right
@@ -121,10 +127,10 @@ function drawGauge(perc){
         r_rects.push([it[0], h-th-2, it[1], h]);
     });
 
-    r_rects.reverse()
+    r_rects.reverse();
 
     l_rects=[];
-    l_intervals.forEach(it => {
+    l_intervals.slice().reverse().forEach(it => {
         l_rects.push([it[0], 0, it[1], th]);
     });
     // Left
@@ -132,16 +138,16 @@ function drawGauge(perc){
         l_rects.push([0, it[0], th, it[1]]);
     });
     // Bottom
-    l_intervals.slice().reverse().forEach(it => {
+    l_intervals.forEach(it => {
         l_rects.push([it[0], h-th-2, it[1], h]);
     });
 
-    if (a<barcnr) {use=theme_dark;} else {use=theme_bright;}
-    topright(use);
-    if (a<tarcnr) {use=theme_dark;} else {use=theme_bright;}
-    bottomright(use);
-    topleft(theme_dark);
-    bottomleft(theme_dark);
+    l_rects.reverse();
+    if (gaugePosR<barcnr) {topright(theme_dark);} else {topright(theme_bright);}
+    if (gaugePosR<tarcnr) {bottomright(theme_dark);} else {bottomright(theme_bright);}
+
+    if (gaugePosL<barcnr) {topleft(theme_dark);} else {topleft(theme_bright);}
+    if (gaugePosL<tarcnr) {bottomleft(theme_dark);} else {bottomleft(theme_bright);}
     // fill rest of center
     g.setColor(g.theme.bg);
     g.fillRect(0+rad,0,     w-rad-2,h);
@@ -149,19 +155,17 @@ function drawGauge(perc){
     g.setColor(theme_bright);
     // Top
     r_rects.forEach((it,index) => {
-        if (index >= a) {g.setColor(theme_dark);}
+        if (index >= gaugePosR) {g.setColor(theme_dark);}
         g.fillRect(it[0],it[1],it[2],it[3]);
-    }
-                   );
+    });
 
-    g.setColor(theme_dark);
+    g.setColor(theme_bright);
     l_rects.forEach((it,index) => {
-        //if (index >= a) {g.setColor(theme_dark);}
+        if (index >= gaugePosL) {g.setColor(theme_dark);}
         g.fillRect(it[0],it[1],it[2],it[3]);
-    }
-                   );
-
+    });
 }
+
 
 var cloudIcon = require("heatshrink").decompress(atob("kEggIfcj+AAYM/8ADBuFwAYPAmADCCAMBwEf8ADBhFwg4aBnEPAYMYjAVBhgDDDoQDHCYc4jwDB+EP///FYIDBMTgA=="));
 var sunIcon = require("heatshrink").decompress(atob("kEggILIgOAAZkDAYPAgeBwPAgIFBBgPhw4TBp/yAYMcnADBnEcAYMwhgDBsEGgE/AYP8AYYLDCYgbDEYYrD8fHIwI7CIYZLDL54AHA=="));
@@ -418,7 +422,7 @@ function drawClock() {
   g.reset();
   g.setColor(g.theme.bg);
   g.fillRect(0, 0, w, h);
-  drawGauge(p_steps);
+  drawGauge(0, p_steps);
   //g.drawImage(getGaugeImage(p_steps), 0, 0);
   setLargeFont();
 
