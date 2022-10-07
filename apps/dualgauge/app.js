@@ -31,6 +31,13 @@ const infoLine = (3*h/4) - 6;
 const infoWidth = 56;
 const infoHeight = 11;
 var drawingSteps = false;
+var tide = {};
+
+var timeCompact={};
+timeCompact.quarters = [0, String.fromCharCode(188), String.fromCharCode(189), String.fromCharCode(190), 0];
+timeCompact.compactTime = function(t) {
+    return ''+t.getHours()+this.quarters[Math.round(t.getMinutes()/15)];
+};
 
 function log_debug(o) {
   //print(o);
@@ -174,9 +181,6 @@ var partSunIcon = require("heatshrink").decompress(atob("kEggIHEmADJjEwsEAjkw8EA
 var snowIcon = require("heatshrink").decompress(atob("kEggITQj/AAYM98ADBsEwAYPAjADCj+AgOAj/gAYMIuEHwEAjEPAYQVChk4AYQhCAYcYBYQTDnEPgEB+EH///IAQACE4IAB8EICIPghwDB4EeBYNAjgDBg8EAYQYCg4bCgZuFA=="));
 var rainIcon = require("heatshrink").decompress(atob("kEggIPMh+AAYM/8ADBuFwAYPgmADB4EbAYOAj/ggOAhnwg4aBnAeCjEcCIMMjADCDoQDHjAPCnAXCuEP///8EDAYJECAAXBwkAgPDhwDBwUMgEEhkggEOjFgFgMQLYQAOA=="));
 var errIcon = require("heatshrink").decompress(atob("kEggILIgOAAYsD4ADBg/gAYMGsADBhkwAYsYjADCjgDBmEMAYNxxwDBsOGAYPBwYDEgOBwOAgYDB4EDHYPAgwDBsADDhgDBFIcwjAHBjE4AYMcmADBhhNCKIcG/4AGOw4A=="));
-var hightideicon = require("heatshrink").decompress(atob("j0ewMB/4AK/0f//z/F///PwADBnwYB/ngAYPzwEH//OgAWBnkABwPwgfP+AzBn/AsOD/8/FYP8+PjB0XwBwQAN+A"));
-var lowtideicon = require("heatshrink").decompress(atob("j0ewMB/4AN+YDC54DCn4CB/gOO/0fBwP4v4OBwADBnw2B/ngAYPzwEH//OgAWBnkABwPwgfP+BRBn/AsODFgnx8YOE+AOCABvwA="));
-
 var hrmImg = require("heatshrink").decompress(atob("i0WgIKHgPh8Ef5/g///44CBz///1///5A4PnBQk///wA4PBA4MDA4MH/+Ah/8gEP4EAjw0GA"));
 
 // https://www.1001fonts.com/rounded-fonts.html?page=3
@@ -384,6 +388,14 @@ function chooseIcon(condition) {
   return cloudIcon;
 }
 
+function getTideIcon(ishigh){
+    if (ishigh){
+        return require("heatshrink").decompress(atob("j0ewIPMgPggEMg+AgEwv4DB4P+gEDj4DBhl//EAmP/CwPD/4OBh/8mEP///4E/z18gHAFYMDh0cB0UPBwQAO"))
+    } else {
+        return require("heatshrink").decompress(atob("j0ewISPhgDCmADC4ACBgYOOgPgBwMHwAOBv4DB4P+BwMfAYMMv/4gEx/4WB4f/BwMP/kwh////An+evgsEh0cBwkPBwQAOA="))
+    }
+}
+
 /**
 Get weather stored in json file by weather app.
 */
@@ -406,8 +418,6 @@ function drawClock() {
   var w_temp;
   var w_icon;
   var w_wind;
-  var t_dec1;
-  var t_dec2;
   var x = (g.getWidth()/2);
   var y = (g.getHeight()/3);
   //if (settings.weather && weatherJson && weatherJson.weather) {
@@ -426,12 +436,11 @@ function drawClock() {
       w_icon = errIcon;
   }
     if (showtides){
-        let h = ieclock.tides.time.getHours();
-        let m = ieclock.tides.time.getMinutes();
         let th = ieclock.tides.height;
-        t_dec1=th.toFixed(0);
-        t_dec2=((Math.abs(th)%1)*10).toFixed();
-        tide_icon = hightideicon;
+        tide.dec1=th.toFixed(0);
+        tide.dec2=((Math.abs(th)%1)*10).toFixed();
+        tide.icon = getTideIcon(ieclock.tides.high);
+        tide.timestring = timeCompact.compactTime(ieclock.tides.time);
     }
   
   g.reset();
@@ -448,8 +457,6 @@ function drawClock() {
   g.setFontAlign(-1,0); // left aligned
   g.drawString(mm, (w/2) + 1, h/2);
 
-  // draw weather line
-  //if (settings.weather) {
     if (true) {
         if (drawCount%3<2){
             g.drawImage(w_icon, (w/2) - 40, 24);
@@ -461,13 +468,17 @@ function drawClock() {
                 g.drawString( (w_wind.split(' ').slice(0, 2).join(' ')), (w/2) + 6, 24 + ((y - 24)/2));
             // display first 2 words of the wind string eg '4 mph'
         } else {
-            g.drawImage(tide_icon, x-40,24);
+            g.drawImage(tide.icon, w/2-40,24);
             setSmallFont();
             g.setFontAlign(-1,0);
-            g.drawString(t_dec1, x+6, 24+((y-24)/2));//  x+8,y+8);
+            g.drawString(tide.dec1, w/2 - 5, 24+((y-24)/2));
             setVerySmallFont();
             g.setFontAlign(-1,-1);
-            g.drawString(t_dec2,x+14, 24+((y-24)/2));
+            g.drawString(tide.dec2,x+3, 24+((y-24)/2));
+            setSmallFont();
+            g.setFontAlign(-1,0);
+            g.drawString('m|', x+11, 24+((y-24)/2));
+            g.drawString(tide.timestring, x+30, 24+((y-24)/2));
         }
     }
   drawInfo();
