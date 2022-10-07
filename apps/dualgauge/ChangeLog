@@ -1,3 +1,4 @@
 0.01: first release
 0.02: Add tides
 0.03: Improve tide icons. Show tidal time as well
+0.04: Remove unused code. Fix color theming.
