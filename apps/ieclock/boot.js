@@ -23,7 +23,7 @@ function updateTide() {
         e = f[ix].split(",");
         t = e[0];
         if(t > nowT){
-            let tideinfo = e;
+            var tideinfo = e;
             break;
         }
     }
