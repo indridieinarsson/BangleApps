@@ -11,6 +11,7 @@ const bl = Math.round(0.5*Math.PI*rad);
 const halflength = (w/2-rad) + bl + (h-rad-rad) + bl + (w/2-rad);
 const n_hbl = Math.round((w/2-rad)/bl);
 const n_bl = Math.round((w-2*rad)/bl);
+const showtides = true;
 
 // TODO : do not hardcode colors
 const theme_bright="#00FFFF";
@@ -173,7 +174,8 @@ var partSunIcon = require("heatshrink").decompress(atob("kEggIHEmADJjEwsEAjkw8EA
 var snowIcon = require("heatshrink").decompress(atob("kEggITQj/AAYM98ADBsEwAYPAjADCj+AgOAj/gAYMIuEHwEAjEPAYQVChk4AYQhCAYcYBYQTDnEPgEB+EH///IAQACE4IAB8EICIPghwDB4EeBYNAjgDBg8EAYQYCg4bCgZuFA=="));
 var rainIcon = require("heatshrink").decompress(atob("kEggIPMh+AAYM/8ADBuFwAYPgmADB4EbAYOAj/ggOAhnwg4aBnAeCjEcCIMMjADCDoQDHjAPCnAXCuEP///8EDAYJECAAXBwkAgPDhwDBwUMgEEhkggEOjFgFgMQLYQAOA=="));
 var errIcon = require("heatshrink").decompress(atob("kEggILIgOAAYsD4ADBg/gAYMGsADBhkwAYsYjADCjgDBmEMAYNxxwDBsOGAYPBwYDEgOBwOAgYDB4EDHYPAgwDBsADDhgDBFIcwjAHBjE4AYMcmADBhhNCKIcG/4AGOw4A=="));
-
+var hightideicon = require("heatshrink").decompress(atob("j0ewMB/4AK/0f//z/F///PwADBnwYB/ngAYPzwEH//OgAWBnkABwPwgfP+AzBn/AsOD/8/FYP8+PjB0XwBwQAN+A"));
+var lowtideicon = require("heatshrink").decompress(atob("j0ewMB/4AN+YDC54DCn4CB/gOO/0fBwP4v4OBwADBnw2B/ngAYPzwEH//OgAWBnkABwPwgfP+BRBn/AsODFgnx8YOE+AOCABvwA="));
 
 var hrmImg = require("heatshrink").decompress(atob("i0WgIKHgPh8Ef5/g///44CBz///1///5A4PnBQk///wA4PBA4MDA4MH/+Ah/8gEP4EAjw0GA"));
 
@@ -214,6 +216,10 @@ function setLargeFont() {
 
 function setSmallFont() {
   g.setFont('Vector', 16);
+}
+
+function setVerySmallFont() {
+  g.setFont('Vector', 12);
 }
 
 function getSteps() {
@@ -396,11 +402,12 @@ function drawClock() {
   var steps = getSteps();
   var p_steps = Math.round(100*(steps/10000));
 
-
   var weatherJson = getWeather();
   var w_temp;
   var w_icon;
   var w_wind;
+  var t_dec1;
+  var t_dec2;
   var x = (g.getWidth()/2);
   var y = (g.getHeight()/3);
   //if (settings.weather && weatherJson && weatherJson.weather) {
@@ -418,12 +425,19 @@ function drawClock() {
       w_wind = "???";
       w_icon = errIcon;
   }
+    if (showtides){
+        let h = ieclock.tides.time.getHours();
+        let m = ieclock.tides.time.getMinutes();
+        let th = ieclock.tides.height;
+        t_dec1=th.toFixed(0);
+        t_dec2=((Math.abs(th)%1)*10).toFixed();
+        tide_icon = hightideicon;
+    }
   
   g.reset();
   g.setColor(g.theme.bg);
   g.fillRect(0, 0, w, h);
   drawGauge(0, p_steps);
-  //g.drawImage(getGaugeImage(p_steps), 0, 0);
   setLargeFont();
 
   g.setColor(settings.fg);
@@ -436,16 +450,26 @@ function drawClock() {
 
   // draw weather line
   //if (settings.weather) {
-  if (true) {
-    g.drawImage(w_icon, (w/2) - 40, 24);
-    setSmallFont();
-    g.setFontAlign(-1,0); // left aligned
-    if (drawCount % 2 == 0)
-      g.drawString(w_temp, (w/2) + 6, 24 + ((y - 24)/2));
-    else
-      g.drawString( (w_wind.split(' ').slice(0, 2).join(' ')), (w/2) + 6, 24 + ((y - 24)/2));
-  // display first 2 words of the wind string eg '4 mph'
-  }
+    if (true) {
+        if (drawCount%3<2){
+            g.drawImage(w_icon, (w/2) - 40, 24);
+            setSmallFont();
+            g.setFontAlign(-1,0); // left aligned
+            if (drawCount % 2 == 0)
+                g.drawString(w_temp, (w/2) + 6, 24 + ((y - 24)/2));
+            else
+                g.drawString( (w_wind.split(' ').slice(0, 2).join(' ')), (w/2) + 6, 24 + ((y - 24)/2));
+            // display first 2 words of the wind string eg '4 mph'
+        } else {
+            g.drawImage(tide_icon, x-40,24);
+            setSmallFont();
+            g.setFontAlign(-1,0);
+            g.drawString(t_dec1, x+6, 24+((y-24)/2));//  x+8,y+8);
+            setVerySmallFont();
+            g.setFontAlign(-1,-1);
+            g.drawString(t_dec2,x+14, 24+((y-24)/2));
+        }
+    }
   drawInfo();
   
   // recalc sunrise / sunset every hour

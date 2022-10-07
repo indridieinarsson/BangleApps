@@ -37,7 +37,7 @@ function updateTide() {
         'e':e,
         'height': th,
         'high':  (e[2]=='true'?true:false)
-    }
+    };
 }
 
 global.ieclock = {
@@ -51,7 +51,7 @@ global.ieclock = {
     intervalId: -1,
     updateTide: updateTide,
     updateSunRiseSunSet: updateSunRiseSunSet
-} 
+}; 
 
 updateSunRiseSunSet();
 updateTide();
