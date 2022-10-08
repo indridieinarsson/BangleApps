@@ -432,7 +432,7 @@ function drawClock() {
         tide.icon = getTideIcon(ieclock.tides.high);
         tide.timestring = timeCompact.compactTime(ieclock.tides.time);
 
-        tmph = getTideHeight(date.getTime);
+        tmph = getTideHeight(date.getTime());
         cntr = (ieclock.tides.high + ieclock.tides.lasthigh)/2;
         rng =  Math.abs(ieclock.tides.high - ieclock.tides.lasthigh);
         tide.hscaled = 100*((tmph - cntr)/rng + 0.5);
