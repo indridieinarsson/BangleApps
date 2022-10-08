@@ -19,12 +19,12 @@ baro.draw = function draw(x,y,Radius, Settings) {
         Text = ''+p+dpsign+"Hp";
         g.drawString(Text, x,y);
     } catch (error) {
-        console.error(error)
+        //console.error(error)
     }
 };
 
 
-let ClockSize = require('https://raw.githubusercontent.com/rozek/banglejs-2-smart-clock-size/main/ClockSize.js')
+let ClockSize = require('https://raw.githubusercontent.com/rozek/banglejs-2-smart-clock-size/main/ClockSize.js');
 baro2 = {};
 baro2.ClockSize = ClockSize;
 baro2.draw = function draw(x,y,Radius, Settings){
@@ -72,7 +72,7 @@ tide.draw = function(x, y, Radius, Settings) {
     let halfScreenWidth   = g.getWidth() / 2;
     let largeComplication = (x === halfScreenWidth);
     auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/auxdial.js");
-    let rmult = (largeComplication?1.7:1.3)
+    let rmult = (largeComplication?1.7:1.3);
     if (typeof ieclock == 'undefined')
     {
         return;
@@ -85,8 +85,8 @@ tide.draw = function(x, y, Radius, Settings) {
     {
         return;
     }
-    let h = ieclock.tides.time.getHours()
-    let m = ieclock.tides.time.getMinutes()
+    let h = ieclock.tides.time.getHours();
+    let m = ieclock.tides.time.getMinutes();
     auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h ,m , true);
     if (largeComplication){
         let th = ieclock.tides.height;
