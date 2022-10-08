@@ -5,7 +5,10 @@
     var s = {'gy' : '#020',
              'fg' : '#0f0',
              'color': 'Green',
-             'check_idle' : true};
+             'check_idle' : true,
+             'tide_min' : 0,
+             'tide_max' : 5
+            };
 
     // ...and overwrite them with any saved values
     // This way saved values are preserved if a new version adds more settings

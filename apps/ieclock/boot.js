@@ -24,18 +24,23 @@ function updateTide() {
         t = e[0];
         if(t > nowT){
             var tideinfo = e;
+            var lasttide = laste;
             break;
         }
+        laste = e;
     }
     if (typeof tideinfo == 'undefined'){
         return;
     }
     th = Math.round(parseInt(e[1])/10)/10;
+    thlast = Math.round(parseInt(laste[1])/10)/10;
     ieclock.tides = {
         'time': Date(parseInt(e[0])),
         'timestamp':parseInt(e[0]),
         'e':e,
         'height': th,
+        'lastheight' : thlast, 
+        'timelast':parseInt(laste[0]),
         'high':  (e[2]=='true'?true:false)
     };
 }

@@ -38,6 +38,16 @@ function log_debug(o) {
   //print(o);
 }
 
+function getTideHeight(nowt){
+  dt=ieclock.tides.timestamp-ieclock.tides.timelast;
+  nowscale = (nowt-ieclock.tides.timelast)*MathPI/dt;
+  c = -ieclock.tides.high*Math.cos(nowscale);
+  if (!ieclock.tides.high)
+    c=-c;
+  rng = (ieclock.tides.height-ieclock.tides.lastheight)/2;
+  return rng+ieclock.tides.lastheight + c*rng;
+}
+
 function find_split_segment(csseg, nrtf){
     for (var i = 0; i < csseg.length; i++) {
         if (nrtf < csseg[i]){
@@ -421,12 +431,17 @@ function drawClock() {
         tide.dec2=((Math.abs(th)%1)*10).toFixed();
         tide.icon = getTideIcon(ieclock.tides.high);
         tide.timestring = timeCompact.compactTime(ieclock.tides.time);
+
+        tmph = getTideHeight(date.getTime);
+        cntr = (ieclock.tides.high + ieclock.tides.lasthigh)/2;
+        rng =  Math.abs(ieclock.tides.high - ieclock.tides.lasthigh);
+        tide.hscaled = 100*((tmph - cntr)/rng + 0.5);
     }
   
   g.reset();
   g.setColor(g.theme.bg);
   g.fillRect(0, 0, w, h);
-  drawGauge(0, p_steps);
+  drawGauge(tide.hscaled, p_steps);
   setLargeFont();
 
   g.setColor(settings.fg);
