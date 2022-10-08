@@ -40,7 +40,7 @@ function log_debug(o) {
 
 function getTideHeight(nowt){
   dt=ieclock.tides.timestamp-ieclock.tides.timelast;
-  nowscale = (nowt-ieclock.tides.timelast)*MathPI/dt;
+  nowscale = (nowt-ieclock.tides.timelast)*Math.PI/dt;
   c = -ieclock.tides.high*Math.cos(nowscale);
   if (!ieclock.tides.high)
     c=-c;
