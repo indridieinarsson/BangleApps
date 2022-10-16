@@ -4,3 +4,4 @@
 0.04: Remove unused code. Fix color theming.
 0.05: Add tide height gauge.
 0.06: Change to a stepless gauge.
+0.06: Fixes to stepless gauge.

@@ -31,6 +31,7 @@ var cg_topright, cg_bottomright,vg_r,hg_rl,hg_ru,cg_topleft,cg_bottomleft,vg_l,h
 var halfGaugeLength;
 
 clearAppArea=function(){
+  g.fillRect(0,0,w,h);
   g.fillRect(0+rad,0+th+2, w-rad, h-th-3);
   g.fillRect(0+th+2,0+rad, w-th-3, h-rad);
 };
@@ -90,11 +91,19 @@ function CGauge(id,val,minV,maxV,color,fColor,begDeg,degs,deg0
   _.setVal(val,-1); // set value only
 } p=CGauge.prototype;
 p.setVal=function(v,o1,o2) { // --- set min/max adj'd val, draw != && o1=0 || o1>0; 
-  var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
-  if (o1<0) { this.val=v; this.vLD=null; // update value only, NO drawing & never draw
-  } else if (v!=this.val||o1>0||o2) { this.val=v; this.draw(o1,o2); }
-  return chd; };
+    var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
+    if (o1<0) {
+        this.val=v; this.vLD=null; // update value only, NO drawing & never draw 
+    } else {
+        this.val = v;
+        this.draw(1);
+    }
+    // if (o1<0) { this.val=v; this.vLD=null; // update value only, NO drawing & never draw
+  // } else if (v!=this.val||o1>0||o2) { this.val=v; this.draw(o1,o2); }
+  // return chd; };
+};
 p.draw=function(o1,o2) { // --- draw circular gauge (otp1:value, 2:ticks+extras)
+  g.reset();
   var s=this.sCnt,v=Math.round(s/(this.maxV-this.minV)*(this.val-this.minV))
     , h=(this.rIn)?1:0,fV=!!this.fV,fF=!!this.fF,bC=this.bClr
     , vL,vs,m; 
@@ -177,10 +186,14 @@ function HGauge(id, val,minV,maxV,color,fColor
 q.setVal=function(v,o1,o2) { // --- set min/max adj'd val, draw != && o1=0 || o1>0; 
   //var chd = (v=(v<Math.min(this.minV,this.maxV))?this.minV:(v>Math.max(this.maxV,this.minV))?this.maxV:v)!=this.val; // ret
   var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
-  if (o1<0) { this.val=v; this.vLD=null; // update value only, NO drawing & never draw
-  } else if (v!=this.val||o1>0||o2) { this.val=v; this.draw(o1,o2); }
-  return chd; };
+  this.val=v;
+  this.draw();
+  // if (o1<0) { this.val=v; this.vLD=null; // update value only, NO drawing & never draw
+  // } else if (v!=this.val||o1>0||o2) { this.val=v; this.draw(o1,o2); }
+  // return chd; };
+};
 q.draw=function(o1,o2) {
+  g.reset();
   xi = (this.val-this.minV)*this.xrange/(this.maxV-this.minV) + this.begX;
   g.setColor.apply(g,this.clr);
   g.fillRect(this.x1,this.y1, xi,this.y2);
@@ -212,10 +225,14 @@ function VGauge(id, val,minV,maxV,color,fColor
 } s=VGauge.prototype;
 s.setVal=function(v,o1,o2) { // --- set min/max adj'd val, draw != && o1=0 || o1>0; 
   var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
-  if (o1<0) { this.val=v; this.vLD=null; // update value only, NO drawing & never draw
-  } else if (v!=this.val||o1>0||o2) { this.val=v; this.draw(o1,o2); }
-  return chd; };
+  this.val=v;  
+  this.draw();
+  // if (o1<0) { this.val=v; this.vLD=null; // update value only, NO drawing & never draw
+  // } else if (v!=this.val||o1>0||o2) { this.val=v; this.draw(o1,o2); }
+  // return chd; };
+};
 s.draw=function(o1,o2) {
+  g.reset();
   yi = (this.val-this.minV)*this.yrange/(this.maxV-this.minV) + this.begY;
   g.setColor.apply(g,this.clr);
   g.fillRect(this.x1,this.y1, this.x2, yi);
@@ -321,8 +338,8 @@ function getSteps() {
 
 function loadSettings() {
   settings = require("Storage").readJSON(SETTINGS_FILE,1)||{};
-  settings.gy = settings.gy||'#020';
-  settings.fg = settings.fg||'#0f0';
+    settings.gy = settings.gy||[0,0.125,0];
+    settings.fg = settings.fg||[0,1,0];
   settings.idle_check = settings.idle_check||true;
 }
 

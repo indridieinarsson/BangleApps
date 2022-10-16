@@ -2,8 +2,8 @@
     const SETTINGS_FILE = "dualgauge.json";
 
     // initialize with default settings...
-    var s = {'gy' : '#020',
-             'fg' : '#0f0',
+    var s = {'gy' : [0,0.125,0],
+             'fg' : [0,1,0],
              'color': 'Green',
              'check_idle' : true,
              'tide_min' : 0,
@@ -25,8 +25,11 @@
     }
 
     var color_options = ['Green','Orange','Cyan','Purple','Red','Blue'];
-    var fg_code = ['#0f0','#ff0','#0ff','#f0f','#f00','#00f'];
-    var gy_code = ['#020','#220','#022','#202','#200','#002'];
+    var fg_code = [[0,1,0],[1,1,0],[0,1,1],[1,0,1],[1,0,0],[0,0,1]];
+    var gy_code = [[0,0.125,0],[0.125,0.125,0],[0,0.125,0.125],[0.125,0,0.125],[0.125,0,0],[0,0,0.125]];
+    // var gy_code = ['#020','#220','#022','#202','#200','#002'];
+    // var fg_code = ['#0f0','#ff0','#0ff','#f0f','#f00','#00f'];
+    // var gy_code = ['#020','#220','#022','#202','#200','#002'];
     
     E.showMenu({
         '': { 'title': 'Dual Gauged Clock' },

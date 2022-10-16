@@ -1,6 +1,6 @@
 { "id": "dualgauge",
   "name": "Dual Gauged Clock",
-  "version":"0.06",
+  "version":"0.07",
   "dependencies": {"mylocation":"app"},
   "description": "A digital clock with square rounded-corners gauge that splits in half. Idle timer and a cyclic information line that includes, day, date, steps, battery, sunrise and sunset times. Influenced by daisy clock - in fact big parts of the code come from there.",
   "icon": "app.png",
