@@ -27,6 +27,8 @@ const infoWidth = 56;
 const infoHeight = 11;
 var drawingSteps = false;
 var tide = {};
+var cg_topright, cg_bottomright,vg_r,hg_rl,hg_ru,cg_topleft,cg_bottomleft,vg_l,hg_ll,hg_lu;
+var halfGaugeLength;
 
 clearAppArea=function(){
   g.fillRect(0+rad,0+th+2, w-rad, h-th-3);
@@ -229,20 +231,19 @@ setupGauge=function(){
     let cornerl = Math.PI*rad/2;
     let fulll = h-2*rad-1;
     let tmp=0;
-    var hg_rl = new HGauge("hg_rl", tmp,tmp,tmp+=halfl,settings.fg, settings.gy, w/2,h-th-2, w-rad-1,h);
-    var cg_bottomright=new CGauge("bottomright",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 90, -90,null, w-rad-1,h-rad-1, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
-    tmp=tmp+cornerl;
-    var vg_r = new VGauge("vg_r", tmp+1, tmp+1, tmp+=fulll, settings.fg, settings.gy, w, h-rad-1,  w-th-2, rad);
-    var cg_topright=new CGauge("topright",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 0, -90,null, w-rad-1,0+rad, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
-    var hg_ru = new HGauge("hg_ru", tmp+1,tmp+1,tmp+=halfl,settings.fg, settings.gy, w-rad-1,th+1, w/2,0);
+    hg_rl = new HGauge("hg_rl", tmp,tmp,tmp+=halfl,settings.fg, settings.gy, w/2,h-th-2, w-rad-1,h);
+    cg_bottomright=new CGauge("bottomright",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 90, -90,null, w-rad-1,h-rad-1, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
+    vg_r = new VGauge("vg_r", tmp+1, tmp+1, tmp+=fulll, settings.fg, settings.gy, w, h-rad-1,  w-th-2, rad);
+    cg_topright=new CGauge("topright",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 0, -90,null, w-rad-1,0+rad, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
+    hg_ru = new HGauge("hg_ru", tmp+1,tmp+1,tmp+=halfl,settings.fg, settings.gy, w-rad-1,th+1, w/2,0);
 
     tmp=0;
-    var hg_ll = new HGauge("hg_ll", tmp,tmp,tmp+=halfl,settings.fg, settings.gy, w/2,h-th-2, rad,h);
-    var cg_bottomleft=new CGauge("bottomleft",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 90, 90,null, 0+rad  ,h-rad-1, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
-    var vg_l = new VGauge("vg_l", tmp+1, tmp+1, tmp+=fulll, settings.fg, settings.gy, th+1, h-rad-1, 0, rad);
-    var cg_topleft=new CGauge("topleft",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 180, 90,null, 0+rad,0+rad, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
-    var hg_lu = new HGauge("hg_lu", tmp+1,tmp+1,tmp+=halfl,settings.fg, settings.gy, rad,th+1, w/2,0);
-    var halfGaugeLength=tmp;
+    hg_ll = new HGauge("hg_ll", tmp,tmp,tmp+=halfl,settings.fg, settings.gy, w/2,h-th-2, rad,h);
+    cg_bottomleft=new CGauge("bottomleft",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 90, 90,null, 0+rad  ,h-rad-1, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
+    vg_l = new VGauge("vg_l", tmp+1, tmp+1, tmp+=fulll, settings.fg, settings.gy, th+1, h-rad-1, 0, rad);
+    cg_topleft=new CGauge("topleft",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 180, 90,null, 0+rad,0+rad, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
+    hg_lu = new HGauge("hg_lu", tmp+1,tmp+1,tmp+=halfl,settings.fg, settings.gy, rad,th+1, w/2,0);
+    halfGaugeLength=tmp;
 
     setvals_l(1000);setvals_l(0);
     setvals_r(1000);setvals_r(0);
