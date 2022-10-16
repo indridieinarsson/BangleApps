@@ -5,8 +5,8 @@ const SETTINGS_FILE = "dualgauge.json";
 const LOCATION_FILE = "mylocation.json";
 const h = g.getHeight();
 const w = g.getWidth();
-const rad = 16;
-const th = 3;
+const rad = 20;
+const th = 5;
 const bl = Math.round(0.5*Math.PI*rad);
 const halflength = (w/2-rad) + bl + (h-rad-rad) + bl + (w/2-rad);
 const n_hbl = Math.round((w/2-rad)/bl);
@@ -32,6 +32,9 @@ var halfGaugeLength;
 
 clearAppArea=function(){
   g.fillRect(0,0,w,h);
+};
+clearClockArea=function(){
+  g.setColor(g.theme.bg);
   g.fillRect(0+rad,0+th+2, w-rad, h-th-3);
   g.fillRect(0+th+2,0+rad, w-th-3, h-rad);
 };
@@ -43,7 +46,7 @@ timeCompact.compactTime = function(t) {
 };
 
 function log_debug(o) {
-  //print(o);
+  // print(o);
 }
 
 function getTideHeight(nowt){
@@ -443,7 +446,7 @@ function drawHrm() {
 
 function draw() {
   if (!idle)
-    drawClock();
+    drawClock(true);
   else
     drawIdle();
   queueDraw();
@@ -500,7 +503,14 @@ function getWeather() {
   return jsonWeather;
 }
 
-function drawClock() {
+function gaugeAndReset(hscaled, pst){
+  g.reset();
+  g.setColor(g.theme.bg);
+  clearAppArea();
+  drawGauge(hscaled, pst);
+}
+
+function drawClock(doGauge) {
   var date = new Date();
   var timeStr = require("locale").time(date,1);
   var da = date.toString().split(" ");
@@ -516,9 +526,7 @@ function drawClock() {
   var w_wind;
   var x = (g.getWidth()/2);
   var y = (g.getHeight()/3);
-    
-  clearAppArea();
-  drawGauge(tide.hscaled, p_steps);
+  
   //if (settings.weather && weatherJson && weatherJson.weather) {
   if (true && weatherJson && weatherJson.weather) {
       var currentWeather = weatherJson.weather;
@@ -546,9 +554,12 @@ function drawClock() {
         let rng =  Math.abs(ieclock.tides.height - ieclock.tides.lastheight);
         tide.hscaled = 100*((tmph - cntr)/rng + 0.5);
     }
-  
-  g.reset();
   g.setColor(g.theme.bg);
+  if (doGauge){
+    gaugeAndReset(tide.hscaled, p_steps);
+  } else {
+    clearClockArea();
+  }
   setLargeFont();
 
   g.setColor.apply(g,settings.fg);
@@ -584,7 +595,6 @@ function drawClock() {
         }
     }
   drawInfo();
-  
   // recalc sunrise / sunset every hour
   if (drawCount % 60 == 0)
     updateSunRiseSunSet(new Date(), location.lat, location.lon);
@@ -781,9 +791,11 @@ Bangle.on('lcdPower',on=>{
 });
 
 Bangle.setUI("clockupdown", btn=> {
+  log_debug("clockupdown btn press " + btn);
   if (btn<0) prevInfo();
   if (btn>0) nextInfo();
-  draw();
+  drawClock(false);
+  queueDraw();
 });
 
 loadSettings();
