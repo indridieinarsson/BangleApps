@@ -516,6 +516,9 @@ function drawClock() {
   var w_wind;
   var x = (g.getWidth()/2);
   var y = (g.getHeight()/3);
+    
+  clearAppArea();
+  drawGauge(tide.hscaled, p_steps);
   //if (settings.weather && weatherJson && weatherJson.weather) {
   if (true && weatherJson && weatherJson.weather) {
       var currentWeather = weatherJson.weather;
@@ -546,12 +549,9 @@ function drawClock() {
   
   g.reset();
   g.setColor(g.theme.bg);
-  clearAppArea();
-  // g.fillRect(0, 0, w, h);
-  drawGauge(tide.hscaled, p_steps);
   setLargeFont();
 
-  g.setColor(settings.fg);
+  g.setColor.apply(g,settings.fg);
   g.setFontAlign(1,0);  // right aligned
   g.drawString(hh, (w/2) - 1, h/2);
 
