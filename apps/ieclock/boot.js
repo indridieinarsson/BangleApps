@@ -12,18 +12,18 @@ function updateSunRiseSunSet(){
 }
 
 function updateTide() {
+    let tideinfo;
     nowT=Date().getTime();
     f = require("Storage").read(ieclock.TIDE_FILE);
     if (typeof f == 'undefined'){
         return;
     }
     f=f.split(";");
-    for (ix in f)
-    {
+    for (var ix in f){
         e = f[ix].split(",");
         t = e[0];
         if(t > nowT){
-            var tideinfo = e;
+            tideinfo = e;
             var lasttide = laste;
             break;
         }
@@ -68,3 +68,4 @@ ieclock.intervaldId = setInterval(function() {
     updateSunRiseSunSet();
     updateTide();
 }, 1000*60*60*2); // update occasionally
+
