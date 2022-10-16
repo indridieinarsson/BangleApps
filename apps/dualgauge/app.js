@@ -28,6 +28,11 @@ const infoHeight = 11;
 var drawingSteps = false;
 var tide = {};
 
+clearAppArea=function(){
+  g.fillRect(0+rad,0+th+2, w-rad, h-th-3);
+  g.fillRect(0+th+2,0+rad, w-th-3, h-rad);
+};
+
 var timeCompact={};
 timeCompact.quarters = [0, String.fromCharCode(188), String.fromCharCode(189), String.fromCharCode(190), 0];
 timeCompact.compactTime = function(t) {
@@ -48,137 +53,220 @@ function getTideHeight(nowt){
   return rng+ieclock.tides.lastheight + c*rng;
 }
 
-function find_split_segment(csseg, nrtf){
-    for (var i = 0; i < csseg.length; i++) {
-        if (nrtf < csseg[i]){
-            return i;
-        }
-    }
-    return csseg.length;
-}
+// Circular gauge
+var p; // temp for prototype references
+function CGauge(id,val,minV,maxV,color,fColor,begDeg,degs,deg0
+               ,x,y,rOuter,rInner,fill,fFill,bgColor) {
+  var _=0||this;
+  _.mxXY=239;     // x, y max graph coord - defaults for BangleJS Graphics
+  _.pps=2;        // 'pixel per segment'/jaggedness/graphical precision/resolution
+  _.tikL=6;       // tick-length (set to 0 post construction for no ticks drawing)
+  _.dado=1;       // draw arc delta only
+  _.bClr=[0,0,0]; // background color (used as default)
+  _.id=id;        // id of the circular gauge
+  _.val=null;     // temporary, set at end of construction
+  _.minV=minV;    // minimum value (arc all in fColor)
+  _.maxV=maxV;    // maximum value (arc all in color)
+  _.clr=color;    // color - as required by Graphics - for the value arc
+  _.fClr=fColor;  // color - as required by Graphics - for to complete the arc
+  _.begD=begDeg;  // 0 degrees: +x-Axis
+  _.degs=degs;    // gauge full arc in degrees -/+ = counter/clockwise
+  _.deg0=(deg0==null)?deg0:begDeg; // for 0/center value mark; null defaults to begDeg
+  _.x=x;          // center x
+  _.y=y;          // center y
+  _.rOut=rOuter;  // radius outer
+  _.rIn=rInner;   // radius inner (optional)
+  _.fV=fill;      // fill value arc w/ color
+  _.fF=fFill;     // fill filler arc w/ fColor
+  _.bClr=(bgColor)?bgColor:this.bClr;                // opt bg color, defaults blk 
+  _.begR=_.rad(_.begD);                              // begin radian
+  _.arcR=(_.degs==360)?Math.PI*2:_.rad(_.degs);      // arc rad used for sCnt only
+  _.segR=(Math.PI/(4/_.pps)/_.rOut)*((degs>0)?1:-1); // segment radian
+  _.sCnt=Math.round(Math.abs(_.arcR/_.segR));        // segment count in arc
+  _.cUp=[];                                          // clean up vertices 
+  _.vLD=null;       // (display/draw) value (v) last displayed/drawn
+  _.setVal(val,-1); // set value only
+} p=CGauge.prototype;
+p.setVal=function(v,o1,o2) { // --- set min/max adj'd val, draw != && o1=0 || o1>0; 
+  var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
+  if (o1<0) { this.val=v; this.vLD=null; // update value only, NO drawing & never draw
+  } else if (v!=this.val||o1>0||o2) { this.val=v; this.draw(o1,o2); }
+  return chd; };
+p.draw=function(o1,o2) { // --- draw circular gauge (otp1:value, 2:ticks+extras)
+  var s=this.sCnt,v=Math.round(s/(this.maxV-this.minV)*(this.val-this.minV))
+    , h=(this.rIn)?1:0,fV=!!this.fV,fF=!!this.fF,bC=this.bClr
+    , vL,vs,m; 
+  if (o1!=-1) { if (h&&(fV==fF)) { g.setColor.apply(g,bC);
+         while (this.cUp.length) {g.drawLine.apply(g,this.cUp.pop()); }
+      } else { this.cUp=[]; }
+    if (o1==1||!this.dado||(vL=this.vLD)==null) {
+      if (v<s) { vs=this._pvs(v,s,-1,0);
+        if (h&&!fF&&fV) { g.setColor.apply(g,bC); this.fSs(vs,vs.length); }
+        g.setColor.apply(g,this.fClr).drawPoly(vs,h);
+        if (h&&fF) this.fSs(vs,vs.length); vs=null; }
+      vs=this._pvs(0,v,1,1);
+      if (h&&!fV&&fF) { g.setColor.apply(g,bC); this.fSs(vs,vs.length); }
+      g.setColor.apply(g,this.clr).drawPoly(vs,h);
+      if (h&&fV) this.fSs(vs,vs.length); vs=null;
+    } else if (v>vL) { vs=this._pvs(vL,v,1,1);
+      if (h&&!fV&&fF) { g.setColor.apply(g,bC); this.fSs(vs,vs.length); }
+      g.setColor.apply(g,this.clr).drawPoly(vs,h&&vL==0);
+      if (h&&fV) this.fSs(vs,vs.length); vs=null;
+    } else if (v<vL) { vs=this._pvs(v,vL,-1,1);
+      if (h&&!fF&&fV) { g.setColor.apply(g,bC); this.fSs(vs,vs.length); }
+      g.setColor.apply(g,this.fClr).drawPoly(vs,h&&vL==s);
+      if (h&&fF) this.fSs(vs,vs.length);
+      vs=(h)?vs.slice((m=vs.length/2-2),m+4):(m=vs.slice(-2)).concat(m);
+      g.setColor.apply(g,this.clr);//g.drawLine.apply(g,vs);
+  } } this.vLD=v; };
+p.fSs=function(vs,vsL) { // --- fill
+  if (vsL<64) { g.fillPoly(vs,1); 
+  } else { var k=30,l=vsL/2,i=0,j=vsL-k,n; 
+    while (i<l) { 
+      g.fillPoly(vs.slice(i,i+=k).concat(vs.slice(j,j+k)),1);
+      if (i<l) { i-=2; if ((n=l-i)<30) k=n; j-=k-2;
+        if (k==2) { k+=2; i-=2; j+=2; }
+  } } } };
+p._pvs=function(f,t,d,c) { // --- calc polygon vertices from..to in direction
+  var x=this.x, y=this.y, rO=this.rOut, rI=this.rIn, bR=this.begR, sR=this.segR
+    , l=(t-f+1)*2*((rI)?2:1) // len of array for vertices (double w/ inner radius
+    , v=((this.mxXY<=355) ? new Uint8Array(l) : new Uint16Array(l)) // vertices array
+    , s=f-1  // segment index 
+    , i=-1,j // vertices array index (running and 'turn around'/last outer)
+    , m=(d>0)?f:t,r // segmentRadian 'multiplier' (starting w/ f or t+1), radian
+    ; 
+  while (++s<=t) { r=bR+m*sR; m+=d;
+    v[++i]=Math.round(x+rO*Math.cos(r));
+    v[++i]=Math.round(y+rO*Math.sin(r)); } 
+  if (rI) { j=i;
+    while (--s>=f) { m-=d; r=bR+m*sR;
+      v[++i]=Math.round(x+rI*Math.cos(r));
+      v[++i]=Math.round(y+rI*Math.sin(r)); }
+    if (c) this.cUp.push(v.slice(j-1,j+3));
+  } 
+  return v; };
+p.rad=function(degrs) { return 2*Math.PI*(degrs%360)/360; }; // radian <-- degrees
 
-function cumsum(segs) {
-    retval = [];
-    segs.forEach(function(nr, ix){
-        if (ix==0) {
-            retval.push(nr);
-        }
-        else {
-            retval.push(nr+retval[ix-1]);
-        }
-    });
-    return retval;
-}
 
-// construct length of all segments:
-function get_cumlength(l, n_bl, nrs){
-    lengths = nrs.map(x => Math.round((x+1)*l/n_bl) - Math.round(x*l/n_bl));
-    all_lengths = [];
-    all_lengths=all_lengths.concat(lengths.slice(n_hbl,n_bl));
-    all_lengths.push(bl);
-    all_lengths=all_lengths.concat(lengths);
-    all_lengths.push(bl);
-    all_lengths=all_lengths.concat(lengths.slice().reverse().slice(n_hbl,n_bl));
-    return cumsum(all_lengths);
-}
 
-function thickring(x,y, r, th, color){
-    g.setColor(color);
-    g.fillCircle(x,y,r);
-    g.setColor(g.theme.bg);
-    g.fillCircle(x,y,r-th-1);
-}
-function topleft(color){
-    thickring(0+rad  ,0+rad  , rad, th, color);
-}
-function topright(color){
-    thickring(w-rad-2,0+rad  , rad, th, color);
-}
-function bottomleft(color){
-    thickring(0+rad  ,h-rad-2, rad, th, color);
-}
-function bottomright(color){
-    thickring(w-rad-2,h-rad-2, rad, th, color);
-}
+// -----------
 
+// Horizontal and vertical gauges
+var q; // temp for prototype references
+function HGauge(id, val,minV,maxV,color,fColor
+               ,x1,y1,x2,y2) {
+  //var _=0||this;
+  var _ = this;
+  _.id=id;        // id of the circular gauge
+  _.val=null;     // temporary, set at end of construction
+  _.minV=minV;    // minimum value (arc all in fColor)
+  _.maxV=maxV;    // maximum value (arc all in color)
+  _.clr=color;    // color - as required by Graphics - for the value arc
+  _.fClr=fColor;  // color - as required by Graphics - for to complete the arc
+  _.begX=x1;//begX;  // 0 degrees: +x-Axis
+  _.x1=x1;          // center x
+  _.y1=y1;          // center y
+  _.x2=x2;          // center x
+  _.y2=y2;          // center y
+  _.xrange=x2-x1;
+  _.vLD=null;       // (display/draw) value (v) last displayed/drawn
+  _.setVal(val,-1); // set value only
+} q=HGauge.prototype;
+q.setVal=function(v,o1,o2) { // --- set min/max adj'd val, draw != && o1=0 || o1>0; 
+  //var chd = (v=(v<Math.min(this.minV,this.maxV))?this.minV:(v>Math.max(this.maxV,this.minV))?this.maxV:v)!=this.val; // ret
+  var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
+  if (o1<0) { this.val=v; this.vLD=null; // update value only, NO drawing & never draw
+  } else if (v!=this.val||o1>0||o2) { this.val=v; this.draw(o1,o2); }
+  return chd; };
+q.draw=function(o1,o2) {
+  xi = (this.val-this.minV)*this.xrange/(this.maxV-this.minV) + this.begX;
+  g.setColor.apply(g,this.clr);
+  g.fillRect(this.x1,this.y1, xi,this.y2);
+  if (xi==this.x2) {return;}
+  g.setColor.apply(g,this.fClr);
+  g.fillRect(xi,this.y1,this.x2,this.y2);
+  };
+
+// -----------------
+var s; // temp for prototype references
+function VGauge(id, val,minV,maxV,color,fColor
+               ,x1,y1,x2,y2) {
+  //var _=0||this;
+  var _ = this;
+  _.id=id;        // id of the circular gauge
+  _.val=null;     // temporary, set at end of construction
+  _.minV=minV;    // minimum value (arc all in fColor)
+  _.maxV=maxV;    // maximum value (arc all in color)
+  _.clr=color;    // color - as required by Graphics - for the value arc
+  _.fClr=fColor;  // color - as required by Graphics - for to complete the arc
+  _.begY=y1;      // 0 degrees: +x-Axis
+  _.x1=x1;          // center x
+  _.y1=y1;          // center y
+  _.x2=x2;          // center x
+  _.y2=y2;          // center y
+  _.yrange=y2-y1;
+  _.vLD=null;       // (display/draw) value (v) last displayed/drawn
+  _.setVal(val,-1); // set value only
+} s=VGauge.prototype;
+s.setVal=function(v,o1,o2) { // --- set min/max adj'd val, draw != && o1=0 || o1>0; 
+  var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
+  if (o1<0) { this.val=v; this.vLD=null; // update value only, NO drawing & never draw
+  } else if (v!=this.val||o1>0||o2) { this.val=v; this.draw(o1,o2); }
+  return chd; };
+s.draw=function(o1,o2) {
+  yi = (this.val-this.minV)*this.yrange/(this.maxV-this.minV) + this.begY;
+  g.setColor.apply(g,this.clr);
+  g.fillRect(this.x1,this.y1, this.x2, yi);
+  if (yi==this.y2) {return;}
+  g.setColor.apply(g,this.fClr);
+  g.fillRect(this.x1, yi, this.x2,this.y2);
+  };
+//-----------
+
+
+setupGauge=function(){
+    let halfl=w/2-rad-1;
+    let cornerl = Math.PI*rad/2;
+    let fulll = h-2*rad-1;
+    let tmp=0;
+    var hg_rl = new HGauge("hg_rl", tmp,tmp,tmp+=halfl,settings.fg, settings.gy, w/2,h-th-2, w-rad-1,h);
+    var cg_bottomright=new CGauge("bottomright",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 90, -90,null, w-rad-1,h-rad-1, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
+    tmp=tmp+cornerl;
+    var vg_r = new VGauge("vg_r", tmp+1, tmp+1, tmp+=fulll, settings.fg, settings.gy, w, h-rad-1,  w-th-2, rad);
+    var cg_topright=new CGauge("topright",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 0, -90,null, w-rad-1,0+rad, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
+    var hg_ru = new HGauge("hg_ru", tmp+1,tmp+1,tmp+=halfl,settings.fg, settings.gy, w-rad-1,th+1, w/2,0);
+
+    tmp=0;
+    var hg_ll = new HGauge("hg_ll", tmp,tmp,tmp+=halfl,settings.fg, settings.gy, w/2,h-th-2, rad,h);
+    var cg_bottomleft=new CGauge("bottomleft",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 90, 90,null, 0+rad  ,h-rad-1, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
+    var vg_l = new VGauge("vg_l", tmp+1, tmp+1, tmp+=fulll, settings.fg, settings.gy, th+1, h-rad-1, 0, rad);
+    var cg_topleft=new CGauge("topleft",tmp+1, tmp+1, tmp+=cornerl, settings.fg, settings.gy, 180, 90,null, 0+rad,0+rad, rad,rad-th-1, settings.fg, settings.gy, [0,0,0]);
+    var hg_lu = new HGauge("hg_lu", tmp+1,tmp+1,tmp+=halfl,settings.fg, settings.gy, rad,th+1, w/2,0);
+    var halfGaugeLength=tmp;
+
+    setvals_l(1000);setvals_l(0);
+    setvals_r(1000);setvals_r(0);
+};
+
+setvals_r = function(x) {
+  cg_topright.setVal(x);
+  cg_bottomright.setVal(x);
+  vg_r.setVal(x);
+  hg_rl.setVal(x);
+  hg_ru.setVal(x);
+};
+setvals_l = function(x) {
+  cg_topleft.setVal(x);
+  cg_bottomleft.setVal(x);
+  vg_l.setVal(x);
+  hg_ll.setVal(x);
+  hg_lu.setVal(x);
+};
 
 function drawGauge(percL, percR){
-    // g.setColor(g.theme.fg);
-    // bogalengd : 2*pi*rad/4 = 
-    tarcnr = n_hbl;
-    barcnr = tarcnr + n_bl+1;
-
-    nrs = [];
-    for (var i=0; i<n_bl; i++){
-        nrs.push(i);
-    }
-
-    l = w-2*rad-2;
-    intervals = nrs.map(x => [rad+Math.round(x*l/n_bl), rad+Math.round((x+1)*l/n_bl)]);
-    cumsum_all = get_cumlength(l, n_bl, nrs);
-    maxPixels=cumsum_all[cumsum_all.length - 1];
-    nrtofindR = Math.round(percR*maxPixels/100);
-    gaugePosR = find_split_segment(cumsum_all, nrtofindR);
-
-    nrtofindL = Math.round(percL*maxPixels/100);
-    gaugePosL = find_split_segment(cumsum_all, nrtofindL);
-
-    r_intervals = intervals.slice(n_hbl, n_bl);
-    l_intervals = intervals.slice(0, n_hbl);
-    r_rects=[];
-
-    r_intervals.forEach(it => {
-        tmp=[it[0], 0, it[1], th];
-        r_rects.push(tmp);
-    });
-    // Right
-    intervals.forEach(it => {
-        r_rects.push([w-th-2, it[0], w, it[1]]);
-    });
-    // Bottom
-    r_intervals.slice().reverse().forEach(it => {
-        r_rects.push([it[0], h-th-2, it[1], h]);
-    });
-
-    r_rects.reverse();
-
-    l_rects=[];
-    l_intervals.slice().reverse().forEach(it => {
-        l_rects.push([it[0], 0, it[1], th]);
-    });
-    // Left
-    intervals.forEach(it => {
-        l_rects.push([0, it[0], th, it[1]]);
-    });
-    // Bottom
-    l_intervals.forEach(it => {
-        l_rects.push([it[0], h-th-2, it[1], h]);
-    });
-
-    l_rects.reverse();
-    if (gaugePosR<barcnr) {topright(settings.gy);} else {topright(settings.fg);}
-    if (gaugePosR<tarcnr) {bottomright(settings.gy);} else {bottomright(settings.fg);}
-
-    if (gaugePosL<barcnr) {topleft(settings.gy);} else {topleft(settings.fg);}
-    if (gaugePosL<tarcnr) {bottomleft(settings.gy);} else {bottomleft(settings.fg);}
-    // fill rest of center
-    g.setColor(g.theme.bg);
-    g.fillRect(0+rad,0,     w-rad-2,h);
-    g.fillRect(0    ,0+rad, w      ,h-rad-2);
-    g.setColor(settings.fg);
-    // Top
-    r_rects.forEach((it,index) => {
-        if (index >= gaugePosR) {g.setColor(settings.gy);}
-        g.fillRect(it[0],it[1],it[2],it[3]);
-    });
-
-    g.setColor(settings.fg);
-    l_rects.forEach((it,index) => {
-        if (index >= gaugePosL) {g.setColor(settings.gy);}
-        g.fillRect(it[0],it[1],it[2],it[3]);
-    });
+    setvals_l(percL*halfGaugeLength/100);
+    setvals_r(percR*halfGaugeLength/100);
 }
-
 
 var cloudIcon = require("heatshrink").decompress(atob("kEggIfcj+AAYM/8ADBuFwAYPAmADCCAMBwEf8ADBhFwg4aBnEPAYMYjAVBhgDDDoQDHCYc4jwDB+EP///FYIDBMTgA=="));
 var sunIcon = require("heatshrink").decompress(atob("kEggILIgOAAZkDAYPAgeBwPAgIFBBgPhw4TBp/yAYMcnADBnEcAYMwhgDBsEGgE/AYP8AYYLDCYgbDEYYrD8fHIwI7CIYZLDL54AHA=="));
@@ -440,7 +528,8 @@ function drawClock() {
   
   g.reset();
   g.setColor(g.theme.bg);
-  g.fillRect(0, 0, w, h);
+  clearAppArea();
+  // g.fillRect(0, 0, w, h);
   drawGauge(tide.hscaled, p_steps);
   setLargeFont();
 
@@ -524,7 +613,8 @@ function drawIdle() {
   let mins = Math.round((getTime() - lastStep) / 60);
   g.reset();
   g.setColor(g.theme.bg);
-  g.fillRect(Bangle.appRect);
+  // g.fillRect(Bangle.appRect);
+  clearAppArea();
   g.setColor(g.theme.fg);
   setSmallFont20();
   g.setFontAlign(0, 0);
@@ -549,8 +639,6 @@ function BUTTON(name,x,y,w,h,c,f,tx) {
 
 // if pressed the callback
 BUTTON.prototype.check = function(x,y) {
-  //console.log(this.name + ":check() x=" + x + " y=" + y +"\n");
-  
   if (x>= this.x && x<= (this.x + this.w) && y>= this.y && y<= (this.y + this.h)) {
     log_debug(this.name + ":callback\n");
     this.callback();
@@ -684,6 +772,7 @@ loadSettings();
 loadLocation();
 
 g.clear();
+setupGauge();
 Bangle.loadWidgets();
 /*
  * we are not drawing the widgets as we are taking over the whole screen

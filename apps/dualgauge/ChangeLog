@@ -3,3 +3,4 @@
 0.03: Improve tide icons. Show tidal time as well
 0.04: Remove unused code. Fix color theming.
 0.05: Add tide height gauge.
+0.06: Change to a stepless gauge.
