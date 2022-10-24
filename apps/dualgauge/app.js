@@ -13,8 +13,8 @@ const n_hbl = Math.round((w/2-rad)/bl);
 const n_bl = Math.round((w-2*rad)/bl);
 const showtides = true;
 
-let settings;
-let location;
+var settings;
+var location;
 
 // variable for controlling idle alert
 let lastStep = getTime();
@@ -94,7 +94,8 @@ function CGauge(id,val,minV,maxV,color,fColor,begDeg,degs,deg0
   _.setVal(val,-1); // set value only
 } p=CGauge.prototype;
 p.setVal=function(v,o1,o2) { // --- set min/max adj'd val, draw != && o1=0 || o1>0; 
-    var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
+    // var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
+    v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v; // ret
     if (o1<0) {
         this.val=v; this.vLD=null; // update value only, NO drawing & never draw 
     } else {
@@ -107,7 +108,7 @@ p.setVal=function(v,o1,o2) { // --- set min/max adj'd val, draw != && o1=0 || o1
 };
 p.draw=function(o1,o2) { // --- draw circular gauge (otp1:value, 2:ticks+extras)
   g.reset();
-  var s=this.sCnt,v=Math.round(s/(this.maxV-this.minV)*(this.val-this.minV))
+  let s=this.sCnt,v=Math.round(s/(this.maxV-this.minV)*(this.val-this.minV))
     , h=(this.rIn)?1:0,fV=!!this.fV,fF=!!this.fF,bC=this.bClr
     , vL,vs,m; 
   if (o1!=-1) { if (h&&(fV==fF)) { g.setColor.apply(g,bC);
@@ -135,14 +136,14 @@ p.draw=function(o1,o2) { // --- draw circular gauge (otp1:value, 2:ticks+extras)
   } } this.vLD=v; };
 p.fSs=function(vs,vsL) { // --- fill
   if (vsL<64) { g.fillPoly(vs,1); 
-  } else { var k=30,l=vsL/2,i=0,j=vsL-k,n; 
+  } else { let k=30,l=vsL/2,i=0,j=vsL-k,n; 
     while (i<l) { 
       g.fillPoly(vs.slice(i,i+=k).concat(vs.slice(j,j+k)),1);
       if (i<l) { i-=2; if ((n=l-i)<30) k=n; j-=k-2;
         if (k==2) { k+=2; i-=2; j+=2; }
   } } } };
 p._pvs=function(f,t,d,c) { // --- calc polygon vertices from..to in direction
-  var x=this.x, y=this.y, rO=this.rOut, rI=this.rIn, bR=this.begR, sR=this.segR
+  let x=this.x, y=this.y, rO=this.rOut, rI=this.rIn, bR=this.begR, sR=this.segR
     , l=(t-f+1)*2*((rI)?2:1) // len of array for vertices (double w/ inner radius
     , v=((this.mxXY<=355) ? new Uint8Array(l) : new Uint16Array(l)) // vertices array
     , s=f-1  // segment index 
@@ -187,8 +188,8 @@ function HGauge(id, val,minV,maxV,color,fColor
   _.setVal(val,-1); // set value only
 } q=HGauge.prototype;
 q.setVal=function(v,o1,o2) { // --- set min/max adj'd val, draw != && o1=0 || o1>0; 
-  //var chd = (v=(v<Math.min(this.minV,this.maxV))?this.minV:(v>Math.max(this.maxV,this.minV))?this.maxV:v)!=this.val; // ret
-  var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
+  // var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
+  v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v; // ret
   this.val=v;
   this.draw();
   // if (o1<0) { this.val=v; this.vLD=null; // update value only, NO drawing & never draw
@@ -227,7 +228,8 @@ function VGauge(id, val,minV,maxV,color,fColor
   _.setVal(val,-1); // set value only
 } s=VGauge.prototype;
 s.setVal=function(v,o1,o2) { // --- set min/max adj'd val, draw != && o1=0 || o1>0; 
-  var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
+  // var chd = (v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v)!=this.val; // ret
+  v=(v<this.minV)?this.minV:(v>this.maxV)?this.maxV:v; // ret
   this.val=v;  
   this.draw();
   // if (o1<0) { this.val=v; this.vLD=null; // update value only, NO drawing & never draw
@@ -355,7 +357,7 @@ function loadLocation() {
 }
 
 function extractTime(d){
-  var h = d.getHours(), m = d.getMinutes();
+  let h = d.getHours(), m = d.getMinutes();
   return(("0"+h).substr(-2) + ":" + ("0"+m).substr(-2));
 }
 
@@ -365,16 +367,15 @@ var drawCount = 0;
 
 function updateSunRiseSunSet(now, lat, lon, line){
   // get today's sunlight times for lat/lon
-  var times = SunCalc.getTimes(new Date(), lat, lon);
-
+  let times = SunCalc.getTimes(new Date(), lat, lon);
   // format sunrise time from the Date object
   sunRise = extractTime(times.sunrise);
   sunSet = extractTime(times.sunset);
 }
 
 const infoData = {
-  ID_DATE:  { calc: () => {var d = (new Date()).toString().split(" "); return d[2] + ' ' + d[1] + ' ' + d[3];} },
-  ID_DAY:   { calc: () => {var d = require("locale").dow(new Date()).toLowerCase(); return d[0].toUpperCase() + d.substring(1);} },
+  ID_DATE:  { calc: () => {let d = (new Date()).toString().split(" "); return d[2] + ' ' + d[1] + ' ' + d[3];} },
+  ID_DAY:   { calc: () => {let d = require("locale").dow(new Date()).toLowerCase(); return d[0].toUpperCase() + d.substring(1);} },
   ID_SR:    { calc: () => 'SUNRISE ' + sunRise },
   ID_SS:    { calc: () => 'SUNSET ' + sunSet },
   ID_STEP:  { calc: () => 'STEPS ' + getSteps() },
@@ -434,7 +435,7 @@ function drawHeartIcon() {
 
 function drawHrm() {
   if (idle) return; // dont draw while prompting
-  var d = new Date();
+  let d = new Date();
   clearInfo();
   g.setColor(d.getSeconds()&1 ? '#f00' : g.theme.bg);
   drawHeartIcon();
@@ -511,25 +512,25 @@ function gaugeAndReset(hscaled, pst){
 }
 
 function drawClock(doGauge) {
-  var date = new Date();
-  var timeStr = require("locale").time(date,1);
-  var da = date.toString().split(" ");
-  var time = da[4].substr(0,5);
-  var hh = da[4].substr(0,2);
-  var mm = da[4].substr(3,2);
-  var steps = getSteps();
-  var p_steps = Math.round(100*(steps/10000));
+  let date = new Date();
+  let timeStr = require("locale").time(date,1);
+  let da = date.toString().split(" ");
+  let time = da[4].substr(0,5);
+  let hh = da[4].substr(0,2);
+  let mm = da[4].substr(3,2);
+  let steps = getSteps();
+  let p_steps = Math.round(100*(steps/10000));
 
-  var weatherJson = getWeather();
-  var w_temp;
-  var w_icon;
-  var w_wind;
-  var x = (g.getWidth()/2);
-  var y = (g.getHeight()/3);
+  let weatherJson = getWeather();
+  let w_temp;
+  let w_icon;
+  let w_wind;
+  let x = (g.getWidth()/2);
+  let y = (g.getHeight()/3);
   
   //if (settings.weather && weatherJson && weatherJson.weather) {
   if (true && weatherJson && weatherJson.weather) {
-      var currentWeather = weatherJson.weather;
+      let currentWeather = weatherJson.weather;
       const temp = locale.temp(currentWeather.temp-273.15,0).match(/^(\D*\d*)(.*)$/);
       w_temp = temp[1] + " " + temp[2];
       w_icon = chooseIcon(currentWeather.txt);
