@@ -35,13 +35,13 @@
       return;
     }
     global.ieclock.tides = {
-      'time': Date(parseInt(e[0])),
-      'timestamp':parseInt(e[0]),
-      'e':e,
-      'height':Math.round(parseInt(e[1])/10)/10,
+      'time': Date(parseInt(tideinfo[0])),
+      'timestamp':parseInt(tideinfo[0]),
+      'e':tideinfo,
+      'height':Math.round(parseInt(tideinfo[1])/10)/10,
       'lastheight':Math.round(parseInt(laste[1])/10)/10, 
       'timelast':parseInt(laste[0]),
-      'high':(e[2]=='true'?true:false)
+      'high':(tideinfo[2]=='true'?true:false)
     };
   }
 
