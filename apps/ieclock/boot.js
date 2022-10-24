@@ -1,4 +1,5 @@
-function updateSunRiseSunSet(){
+(function () { 
+  function updateSunRiseSunSet(){
     var SunCalc = require("https://raw.githubusercontent.com/mourner/suncalc/master/suncalc.js");
     let now=Date();
     let location = require("Storage").readJSON(ieclock.LOCATION_FILE,1)||{};
@@ -6,45 +7,45 @@ function updateSunRiseSunSet(){
     location.lon = location.lon||0.1276;
     location.location = location.location||"London";
     let times = SunCalc.getTimes(new Date(), location.lat, location.lon);
-    ieclock.times = times;
-    ieclock.sunrise = times.sunrise;
-    ieclock.sunset = times.sunset;
-}
-
-function updateTide() {
-  let tideinfo, laste;
-  let nowT=Date().getTime();
-  let f = require("Storage").read(ieclock.TIDE_FILE);
-  if (typeof f == 'undefined'){
-    return;
+    global.ieclock.times = times;
+    global.ieclock.sunrise = times.sunrise;
+    global.ieclock.sunset = times.sunset;
   }
-  f=f.split(";");
-  for (var ix in f){
-    let e = f[ix].split(",");
-    if(e[0] > nowT){
-      tideinfo = e;
-      break;
+
+  function updateTide() {
+    let tideinfo, laste;
+    let nowT=Date().getTime();
+    let f = require("Storage").read(global.ieclock.TIDE_FILE);
+    if (typeof f == 'undefined'){
+      return;
     }
-    laste = e;
+    f=f.split(";");
+    for (var ix in f){
+      let e = f[ix].split(",");
+      if(e[0] > nowT){
+        tideinfo = e;
+        break;
+      }
+      laste = e;
+    }
+    if (typeof tideinfo == 'undefined'){
+      return;
+    }
+    if (typeof laste == 'undefined'){
+      return;
+    }
+    global.ieclock.tides = {
+      'time': Date(parseInt(e[0])),
+      'timestamp':parseInt(e[0]),
+      'e':e,
+      'height':Math.round(parseInt(e[1])/10)/10,
+      'lastheight':Math.round(parseInt(laste[1])/10)/10, 
+      'timelast':parseInt(laste[0]),
+      'high':(e[2]=='true'?true:false)
+    };
   }
-  if (typeof tideinfo == 'undefined'){
-    return;
-  }
-  if (typeof laste == 'undefined'){
-    return;
-  }
-  global.ieclock.tides = {
-    'time': Date(parseInt(e[0])),
-    'timestamp':parseInt(e[0]),
-    'e':e,
-    'height':Math.round(parseInt(e[1])/10)/10,
-    'lastheight':Math.round(parseInt(laste[1])/10)/10, 
-    'timelast':parseInt(laste[0]),
-    'high':(e[2]=='true'?true:false)
-  };
-}
 
-global.ieclock = {
+  global.ieclock = {
     sunrise: Date(),
     sunset: Date(),
     location: {},
@@ -55,13 +56,13 @@ global.ieclock = {
     intervalId: -1,
     updateTide: updateTide,
     updateSunRiseSunSet: updateSunRiseSunSet
-}; 
+  }; 
 
-updateSunRiseSunSet();
-updateTide();
+  updateSunRiseSunSet();
+  updateTide();
 
-ieclock.intervaldId = setInterval(function() {
+  global.ieclock.intervaldId = setInterval(function() {
     updateSunRiseSunSet();
     updateTide();
-}, 1000*60*60*2); // update occasionally
-
+  }, 1000*60*60*2); // update occasionally
+})();
