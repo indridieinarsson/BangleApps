@@ -12,40 +12,36 @@ function updateSunRiseSunSet(){
 }
 
 function updateTide() {
-    let tideinfo;
-    nowT=Date().getTime();
-    f = require("Storage").read(ieclock.TIDE_FILE);
-    if (typeof f == 'undefined'){
-        return;
+  let tideinfo, laste;
+  let nowT=Date().getTime();
+  let f = require("Storage").read(ieclock.TIDE_FILE);
+  if (typeof f == 'undefined'){
+    return;
+  }
+  f=f.split(";");
+  for (var ix in f){
+    let e = f[ix].split(",");
+    if(e[0] > nowT){
+      tideinfo = e;
+      break;
     }
-    f=f.split(";");
-    for (var ix in f){
-        e = f[ix].split(",");
-        t = e[0];
-        if(t > nowT){
-            tideinfo = e;
-            var lasttide = laste;
-            break;
-        }
-        laste = e;
-    }
-    if (typeof tideinfo == 'undefined'){
-        return;
-    }
-    if (typeof laste == 'undefined'){
-        return;
-    }
-    th = Math.round(parseInt(e[1])/10)/10;
-    thlast = Math.round(parseInt(laste[1])/10)/10;
-    ieclock.tides = {
-        'time': Date(parseInt(e[0])),
-        'timestamp':parseInt(e[0]),
-        'e':e,
-        'height':th,
-        'lastheight':thlast, 
-        'timelast':parseInt(laste[0]),
-        'high':(e[2]=='true'?true:false)
-    };
+    laste = e;
+  }
+  if (typeof tideinfo == 'undefined'){
+    return;
+  }
+  if (typeof laste == 'undefined'){
+    return;
+  }
+  global.ieclock.tides = {
+    'time': Date(parseInt(e[0])),
+    'timestamp':parseInt(e[0]),
+    'e':e,
+    'height':Math.round(parseInt(e[1])/10)/10,
+    'lastheight':Math.round(parseInt(laste[1])/10)/10, 
+    'timelast':parseInt(laste[0]),
+    'high':(e[2]=='true'?true:false)
+  };
 }
 
 global.ieclock = {
