@@ -8,3 +8,4 @@
 0.07: Fixes to stepless gauge.
 0.08: More responsiveness.
 0.09: Tidy up variable scope.
+0.10: Fix bug in tide height calculation.
