@@ -53,8 +53,6 @@ function getTideHeight(nowt){
   dt=ieclock.tides.timestamp-ieclock.tides.timelast;
   nowscale = (nowt-ieclock.tides.timelast)*Math.PI/dt;
   c = -ieclock.tides.height*Math.cos(nowscale);
-  if (!ieclock.tides.high)
-    c=-c;
   rng = (ieclock.tides.height-ieclock.tides.lastheight)/2;
   return rng+ieclock.tides.lastheight + c*rng;
 }
