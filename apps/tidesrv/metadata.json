@@ -5,7 +5,6 @@
   "description": "Service ",
   "tags": "Service to provide info on tides",
   "supports" : ["BANGLEJS2"],
-  "allow_emulator": true,
   "readme": "README.md",
   "storage": [
     {"name":"tidesrv.boot.js","url":"boot.js"},

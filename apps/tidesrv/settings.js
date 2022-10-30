@@ -1,5 +1,4 @@
 (function(back) {
-  stuff=JSON.parse('[{"id":"thorlakshofn","description":"Þorlákshöfn"},{"id":"grindavik","description":"Grindavík"},{"id":"reykjanesta","description":"Reykjanestá/Röst"},{"id":"sandvik","description":"Sandvík"},{"id":"gardskagi","description":"Garðskagi"},{"id":"reykjavik","description":"Reykjavík"},{"id":"hvalfjordur","description":"Hvalfjörður"},{"id":"grundartangi","description":"Grundartangi"},{"id":"borgarfjordur","description":"Borgarfjörður"},{"id":"longufjorur","description":"Löngufjörur"},{"id":"arnarstapi","description":"Arnarstapi"},{"id":"hornvik","description":"Hornvík"},{"id":"latravik","description":"Látravik"},{"id":"straumnes","description":"Straumnes"},{"id":"holmavik","description":"Hólmavík"},{"id":"husavik","description":"Húsavík"},{"id":"testsite","description":"Testsite"}]');
   
   var FILE = "tidesrv.json";
   // Load settings
@@ -27,4 +26,4 @@
       }
     },
   });
-});
+})
