@@ -63,8 +63,6 @@ function updateTide() {
   };
 }
 
-
-
 global.tidesrv = {
   sunrise: Date(),
   sunset: Date(),
@@ -76,7 +74,7 @@ global.tidesrv = {
   intervalId: -1,
   updateTide: updateTide,
   updateSunRiseSunSet: updateSunRiseSunSet,
-  refreshTideFile: refreshTideFile,
+  refreshTideFile: refreshTideFile
 }; 
 
 updateSunRiseSunSet();

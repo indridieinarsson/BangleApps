@@ -1,7 +1,7 @@
 { "id":  "tidesrv",
   "name": "Tide service",
   "shortName":"Tide Service",
-  "version":"0.03",
+  "version":"0.05",
   "description": "Service ",
   "icon": "app-icon.png",
   "tags": "Service to provide info on tides",
@@ -12,6 +12,5 @@
   "storage": [
     {"name":"tidesrv.boot.js","url":"boot.js"},
     {"name":"tidesrv.settings.js","url":"settings.js"},
-  ],
-  "data": [{"name":"tidesrv.json"}];
+  ];
 }
