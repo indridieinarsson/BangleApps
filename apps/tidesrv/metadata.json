@@ -1,18 +1,17 @@
 { "id":  "tidesrv",
   "name": "Tide service",
   "shortName":"Tide Service",
-  "version":"0.02",
+  "version":"0.03",
   "description": "Service ",
   "icon": "app-icon.png",
   "tags": "Service to provide info on tides",
-  "supports" : ["BANGLEJS2"],
+  "supports" : ["BANGLEJS2", "BANGLEJS1"],
   "allow_emulator": true,
   "screenshots": [{"url":"app-screenshot.png"}],
   "readme": "README.md",
   "storage": [
     {"name":"tidesrv.boot.js","url":"boot.js"},
     {"name":"tidesrv.settings.js","url":"settings.js"},
-    {"name":"tidesrv.img","url":"app-icon.js","evaluate":true}
   ],
   "data": [{"name":"tidesrv.json"}];
 }
