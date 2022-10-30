@@ -11,7 +11,6 @@
   function writeSettings() {
     require('Storage').writeJSON(FILE, settings);
   }
-
   // Show the menu
   E.showMenu({
     "" : { "title" : "App Name" },
@@ -21,7 +20,6 @@
       min: 0, max: stuff.length-1,
       format : v => stuff[v].id,
       onchange: v => {
-        console.log(v);
         settings.tidesite = stuff[v].id;
         settings.nr = v;
         writeSettings();
@@ -29,4 +27,4 @@
       }
     },
   });
-})
+});
