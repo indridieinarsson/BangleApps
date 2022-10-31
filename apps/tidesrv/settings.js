@@ -10,6 +10,7 @@
     require('Storage').writeJSON(FILE, settings);
   }
   // Show the menu
+  stuff = global.tidesrv.getTideStations();
   E.showMenu({
     "" : { "title" : "App Name" },
     "< Back" : () => back(),
