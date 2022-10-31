@@ -3,9 +3,7 @@
   "shortName": "Tide Service",
   "version": "0.05",
   "description": "Service ",
-  "tags": "Service to provide info on tides",
   "supports": ["BANGLEJS2"],
-  "readme": "README.md",
   "storage": [
     {"name":"tidesrv.app.js", "url":"app.js"},
     {"name":"tidesrv.boot.js", "url":"boot.js"},

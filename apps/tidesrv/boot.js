@@ -52,7 +52,7 @@ function updateTide() {
   }
   th = Math.round(parseInt(e[1])/10)/10;
   thlast = Math.round(parseInt(laste[1])/10)/10;
-  tidesrv.tides = {
+  global.tidesrv.tides = {
     'time': Date(parseInt(e[0])),
     'timestamp':parseInt(e[0]),
     'e':e,
