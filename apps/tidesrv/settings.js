@@ -11,9 +11,10 @@
   }
   // Show the menu
   // stuff = global.tidesrv.getTideStations();
-  let str = 'https://tideapi.spliff-donk.de/stations/list';
-  Bangle.http(str).then(data=>{
-    let stuff = JSON.parse(data);
+  let str = "https://tideapi.spliff-donk.de/stations/list";
+  Bangle.http(str, {timeout:10000}).then(data=>{
+    let stuff = JSON.parse(data.resp);
+    global.tidesrv.laststuff = stuff;
     E.showMenu({
       "" : { "title" : "App Name" },
       "< Back" : () => back(),
