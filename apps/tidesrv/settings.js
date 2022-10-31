@@ -1,5 +1,4 @@
 (function(back) {
-  
   var FILE = "tidesrv.json";
   // Load settings
   var settings = Object.assign({
@@ -24,6 +23,6 @@
         writeSettings();
         global.tidesrv.refreshTideFile();
       }
-    },
+    }
   });
 })
