@@ -1,7 +1,7 @@
 { 
   "id":  "tidesrv",
   "name": "Tide service",
-  "version": "0.08",
+  "version": "0.09",
   "description": "Service for tidal information",
   "icon": "widget.png",
   "tags": "widget, app",

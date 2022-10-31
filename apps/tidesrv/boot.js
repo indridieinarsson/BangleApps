@@ -12,14 +12,6 @@
     tidesrv.sunset = times.sunset;
   }
 
-  function getTideStations()
-  {
-    let str = 'https://tideapi.spliff-donk.de/stations/list';
-    Bangle.http(str).then(data=>{
-      return JSON.parse(data);
-    });
-  }
-
   function refreshTideFile() {
     let settings = require('Storage').readJSON("tidesrv.json", true) || {};
     let tidesite = settings.tidesite || 'reykjavik';
@@ -30,8 +22,7 @@
     let end = now+24*60*60*1000*30;
     let str = 'https://tideapi.spliff-donk.de/stations/table?stationid='+tidesite+'&startdate='+start.getFullYear()+'-'+(start.getMonth()+1)+'-'+start.getDate()+'&enddate='+end.getFullYear()+'-'+(end.getMonth()+1)+'-'+end.getDate();
     Bangle.http(str).then(data=>{
-      console.log("Got ",data);
-      require("Storage").write(tidesrv.TIDE_FILE, data);
+      require("Storage").write(tidesrv.TIDE_FILE, data.resp);
     });
   }
 
@@ -83,8 +74,7 @@
     intervalId: -1,
     updateTide: updateTide,
     updateSunRiseSunSet: updateSunRiseSunSet,
-    refreshTideFile: refreshTideFile,
-    getTideStations: getTideStations
+    refreshTideFile: refreshTideFile
   }; 
 
   updateSunRiseSunSet();
