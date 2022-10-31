@@ -1,0 +1,15 @@
+{ 
+  "id":  "tidesrv",
+  "name": "Tide service",
+  "version": "0.05",
+  "description": "Service for tidal information",
+  "icon": "widget.png",
+  "tags": "widget, app",
+  "supports": ["BANGLEJS","BANGLEJS2"],
+  "storage": [
+    {"name":"tidesrv.app.js", "url":"app.js"},
+    {"name":"tidesrv.boot.js", "url":"boot.js"},
+    {"name":"tidesrv.settings.js", "url":"settings.js"},
+    {"name":"tidesrv.img","url":"app-icon.js","evaluate":true}
+  ]
+}
