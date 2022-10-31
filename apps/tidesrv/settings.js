@@ -10,20 +10,24 @@
     require('Storage').writeJSON(FILE, settings);
   }
   // Show the menu
-  stuff = global.tidesrv.getTideStations();
-  E.showMenu({
-    "" : { "title" : "App Name" },
-    "< Back" : () => back(),
-    'Site?': {
-      value: 0|settings.id,  // 0| converts undefined to 0
-      min: 0, max: stuff.length-1,
-      format : v => stuff[v].id,
-      onchange: v => {
-        settings.tidesite = stuff[v].id;
-        settings.nr = v;
-        writeSettings();
-        global.tidesrv.refreshTideFile();
+  // stuff = global.tidesrv.getTideStations();
+  let str = 'https://tideapi.spliff-donk.de/stations/list';
+  Bangle.http(str).then(data=>{
+    let stuff = JSON.parse(data);
+    E.showMenu({
+      "" : { "title" : "App Name" },
+      "< Back" : () => back(),
+      'Site?': {
+        value: 0|settings.id,  // 0| converts undefined to 0
+        min: 0, max: stuff.length-1,
+        format : v => stuff[v].id,
+        onchange: v => {
+          settings.tidesite = stuff[v].id;
+          settings.nr = v;
+          writeSettings();
+          global.tidesrv.refreshTideFile();
+        }
       }
-    }
+    });
   });
 })
