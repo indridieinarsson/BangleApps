@@ -1,13 +1,14 @@
 { "id":  "tidesrv",
   "name": "Tide service",
-  "shortName":"Tide Service",
-  "version":"0.05",
+  "shortName": "Tide Service",
+  "version": "0.05",
   "description": "Service ",
   "tags": "Service to provide info on tides",
-  "supports" : ["BANGLEJS2"],
+  "supports": ["BANGLEJS2"],
   "readme": "README.md",
   "storage": [
-    {"name":"tidesrv.boot.js","url":"boot.js"},
-    {"name":"tidesrv.settings.js","url":"settings.js"}
+    {"name":"tidesrv.app.js", "url":"app.js"},
+    {"name":"tidesrv.boot.js", "url":"boot.js"},
+    {"name":"tidesrv.settings.js", "url":"settings.js"}
   ];
 }
