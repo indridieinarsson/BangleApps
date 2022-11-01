@@ -18,8 +18,8 @@
     delete settings; // remove unneeded settings from memory
 
     let now = new Date();
-    let start = now-24*60*60*1000;
-    let end = now+24*60*60*1000*30;
+    let start = new Date(now-24*60*60*1000);
+    let end = new Date(now+24*60*60*1000*30);
     let str = 'https://tideapi.spliff-donk.de/stations/table?stationid='+tidesite+'&startdate='+start.getFullYear()+'-'+(start.getMonth()+1)+'-'+start.getDate()+'&enddate='+end.getFullYear()+'-'+(end.getMonth()+1)+'-'+end.getDate();
     Bangle.http(str).then(data=>{
       require("Storage").write(tidesrv.TIDE_FILE, data.resp);
