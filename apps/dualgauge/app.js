@@ -50,11 +50,11 @@ function log_debug(o) {
 }
 
 function getTideHeight(nowt){
-  dt=ieclock.tides.timestamp-ieclock.tides.timelast;
-  nowscale = (nowt-ieclock.tides.timelast)*Math.PI/dt;
-  c = -ieclock.tides.height*Math.cos(nowscale);
-  rng = (ieclock.tides.height-ieclock.tides.lastheight)/2;
-  return rng+ieclock.tides.lastheight + c*rng;
+  dt=tidesrv.tides.timestamp-tidesrv.tides.timelast;
+  nowscale = (nowt-tidesrv.tides.timelast)*Math.PI/dt;
+  c = -tidesrv.tides.height*Math.cos(nowscale);
+  rng = (tidesrv.tides.height-tidesrv.tides.lastheight)/2;
+  return rng+tidesrv.tides.lastheight + c*rng;
 }
 
 // Circular gauge
@@ -542,15 +542,15 @@ function drawClock(doGauge) {
       w_icon = errIcon;
   }
     if (showtides){
-        let th = ieclock.tides.height;
+        let th = tidesrv.tides.height;
         tide.dec1=th.toFixed(0);
         tide.dec2=((Math.abs(th)%1)*10).toFixed();
-        tide.icon = getTideIcon(ieclock.tides.high);
-        tide.timestring = timeCompact.compactTime(ieclock.tides.time);
+        tide.icon = getTideIcon(tidesrv.tides.high);
+        tide.timestring = timeCompact.compactTime(tidesrv.tides.time);
 
         let tmph = getTideHeight(date.getTime());
-        let cntr = (ieclock.tides.height + ieclock.tides.lastheight)/2;
-        let rng =  Math.abs(ieclock.tides.height - ieclock.tides.lastheight);
+        let cntr = (tidesrv.tides.height + tidesrv.tides.lastheight)/2;
+        let rng =  Math.abs(tidesrv.tides.height - tidesrv.tides.lastheight);
         tide.hscaled = 100*((tmph - cntr)/rng + 0.5);
     }
   g.setColor(g.theme.bg);
