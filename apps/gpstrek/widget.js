@@ -25,12 +25,12 @@ function onGPS(fix) {
 
 function onMag(e) {
   if (!state.compassHeading) state.compassHeading = e.heading;
-  
+
   //if (a+180)mod 360 == b then
   //return (a+b)/2 mod 360 and ((a+b)/2 mod 360) + 180 (they are both the solution, so you may choose one depending if you prefer counterclockwise or clockwise direction)
 //else
   //return arctan(  (sin(a)+sin(b)) / (cos(a)+cos(b) )
-  
+
   /*
   let average;
   let a = radians(compassHeading);
@@ -74,6 +74,12 @@ function onAcc (e){
 }
 
 function start(bg){
+  Bangle.removeListener('GPS', onGPS);
+  Bangle.removeListener("HRM", onPulse);
+  Bangle.removeListener("mag", onMag);
+  Bangle.removeListener("step", onStep);
+  Bangle.removeListener("pressure", onPressure);
+  Bangle.removeListener('accel', onAcc);
   Bangle.on('GPS', onGPS);
   Bangle.on("HRM", onPulse);
   Bangle.on("mag", onMag);
@@ -112,7 +118,7 @@ function stop(bg){
   saveState();
   Bangle.drawWidgets();
 }
-  
+
 function initState(){
   //cleanup volatile state here
   state.currentPos={};
