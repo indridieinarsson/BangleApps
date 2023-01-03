@@ -1,4 +1,4 @@
-var SunCalc = require("https://raw.githubusercontent.com/mourner/suncalc/master/suncalc.js");
+var SunCalc = require("suncalc"); // from modules folder
 const storage = require('Storage');
 const locale = require("locale");
 const SETTINGS_FILE = "daisy.json";
@@ -216,7 +216,7 @@ function getSteps() {
   try {
     return Bangle.getHealthStatus("day").steps;
   } catch (e) {
-    if (WIDGETS.wpedom !== undefined) 
+    if (WIDGETS.wpedom !== undefined)
       return WIDGETS.wpedom.getSteps();
     else
       return 0;
@@ -297,7 +297,7 @@ function prevInfo() {
 function clearInfo() {
   g.setColor(g.theme.bg);
   //g.setColor(g.theme.fg);
-  g.fillRect((w/2) - infoWidth, infoLine - infoHeight, (w/2) + infoWidth, infoLine + infoHeight); 
+  g.fillRect((w/2) - infoWidth, infoLine - infoHeight, (w/2) + infoWidth, infoLine + infoHeight);
 }
 
 function drawInfo() {
@@ -392,7 +392,6 @@ function drawClock() {
   var steps = getSteps();
   var p_steps = Math.round(100*(steps/10000));
 
-
   var weatherJson = getWeather();
   var w_temp;
   var w_icon;
@@ -443,7 +442,7 @@ function drawClock() {
   // display first 2 words of the wind string eg '4 mph'
   }
   drawInfo();
-  
+
   // recalc sunrise / sunset every hour
   if (drawCount % 60 == 0)
     updateSunRiseSunSet(new Date(), location.lat, location.lon);
@@ -479,7 +478,7 @@ function resetHrm() {
 Bangle.on('HRM', function(hrm) {
   hrmCurrent = hrm.bpm;
   hrmConfidence = hrm.confidence;
-  log_debug("HRM=" + hrm.bpm + " (" + hrm.confidence + ")"); 
+  log_debug("HRM=" + hrm.bpm + " (" + hrm.confidence + ")");
   if (infoMode == "ID_HRM" ) drawHrm();
 });
 
@@ -585,7 +584,7 @@ function getGaugeImage(p) {
     palette : pal2,
     buffer : require("heatshrink").decompress(atob("AH4A/AH4AChWq1WpqtUFUgpBFYYABoApggQqDFYlVqBVjFYxZfFQorGLLrWCFZbgbVguoBQcFLD8qFQYMHiosDKzoOJFgZYYKwYPLFgZWawARMLDJWCawgAJcAZWYCZ6FCLCkKFQOgCZ8BFYNUFaZWSLAlAQShWQLAiESQQRtTLAKESFQOoFacFQiSCCwArTgCESQSyEUlTZTboyCnQiSCYQiSCYQiSCZQgdAVxwqYQgSwMVwOoFbMFWBquaWCArBVzKwDbRoqaWATcKbQKuaWAbcKbQKuaWAbcKVzqwNFYIqcWATaKVziwDbhDaebhjaebhgrBbTrcCFZDafbheqFcTcHbT7cDFY0CbT7cDqArxhWqwArfgFVqgrHFUDcBFY0qFcdVFY2oFcMFFY2qFclAFYugFcMBFYsCFctQFYuAFcMAFYsKFctUFYoqigEVFeEqFctVFYmoFccFFYmqFc1AcIdQFccBFf4rbGAoAhKQYr/Fa8FFc9UFYYqkgEVFf4r/FYwDDAEZTDFf4r/Ff4rbqorooArBqArlgIr/Ff4r/Ff4r/Ff4r/Ff4r/Ff4r/Ff4rbqgrlgorCioroAYIr/Ff4r/FbYDDAEZTDFf4r/FYtAFclVFYUBFc9QFf4rZAgoAgKQor/FbFUFccFFYkVFcwFDioFEAD4lFGIorgPogrtWoYAfqorEgIrlqArFAwgAdEg4rlPgqKFADrUHcQorfA4sVA4wAbEY4zHFbh7GRY4AbaY7jBqAqfERArrMBAAZUxNVbkEVFZAJBFcJhRAC6lJFYLcebQIrIBRTaXJhIrhUhLcfD5YLBbjtVFZTceZ5jceJRpkLVyaiLWDpJNFYKwaUIIrMSIKwaDhw6OVx50NFYKwZDZ6waOaCTBQjBGBZZw8CQi4ZBOR6EYeySEYQSCEaQSITDH6BvGIaKEWQSSEEbqQVVQgRYSKwLGUQgRCQKwTFUC4RYQKwSCTDAhEONQTwULAqcNCARWVLAhGMB55YPDhQqDKy4dFFhAMMLCzgFawZWbEI4AIGogAYFZtAFbgsMFTyyGVkBZOKr7gJazoA/AHIA="))
   };
-  
+
   // p90
   if (p >= 90 && p < 100) return {
     width : 176, height : 176, bpp : 2,
@@ -635,7 +634,7 @@ function BUTTON(name,x,y,w,h,c,f,tx) {
 // if pressed the callback
 BUTTON.prototype.check = function(x,y) {
   //console.log(this.name + ":check() x=" + x + " y=" + y +"\n");
-  
+
   if (x>= this.x && x<= (this.x + this.w) && y>= this.y && y<= (this.y + this.h)) {
     log_debug(this.name + ":callback\n");
     this.callback();
@@ -697,7 +696,7 @@ function checkIdle() {
     warned = false;
     return;
   }
-  
+
   let hour = (new Date()).getHours();
   let active = (hour >= 9 && hour < 21);
   //let active = true;
@@ -726,7 +725,7 @@ function buzzer(n) {
 
   if (n-- < 1) return;
   Bangle.buzz(250);
-  
+
   if (buzzTimeout) clearTimeout(buzzTimeout);
   buzzTimeout = setTimeout(function() {
     buzzTimeout = undefined;
