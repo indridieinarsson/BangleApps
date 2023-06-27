@@ -1,14 +1,22 @@
 (() => {
-  require("Font5x9Numeric7Seg").add(Graphics);
-  require("FontTeletext5x9Ascii").add(Graphics);
-  require("Font4x5").add(Graphics);
-  const config = Object.assign({
-    maxhours: 24,
-    drawBell: false,
-    padHours: true,
-    showSeconds: 0, // 0=never, 1=only when display is unlocked, 2=for less than a minute
-    font: 0, // 0=segment style font, 1=teletest font, 2=4x5
-  }, require("Storage").readJSON("widalarmeta.json",1) || {});
+  let config;
+
+  function loadSettings() {
+    config = Object.assign({
+      maxhours: 24,
+      drawBell: false,
+      padHours: true,
+      showSeconds: 0, // 0=never, 1=only when display is unlocked, 2=for less than a minute
+      font: 1, // 0=segment style font, 1=teletext font, 2=6x8:1x2
+    }, require("Storage").readJSON("widalarmeta.json",1) || {});
+
+      if (config.font == 0) {
+        require("Font5x9Numeric7Seg").add(Graphics);
+      } else if (config.font == 1) {
+        require("FontTeletext5x9Ascii").add(Graphics);
+      }
+  }
+  loadSettings();
 
   function getNextAlarm(date) {
     const alarms = (require("Storage").readJSON("sched.json",1) || []).filter(alarm => alarm.on && alarm.hidden !== true);
@@ -25,7 +33,7 @@
     }
   } // getNextAlarm
 
-  function draw(fromInterval) {
+  function draw(_w, fromInterval) {
     if (this.nextAlarm === undefined) {
       let alarm = getNextAlarm();
       if (alarm === undefined) {
@@ -63,13 +71,13 @@
       if (drawSeconds) {
         text += ":" + seconds.padStart(2, '0');
       }
-      if (config.font == 1) {
+      if (config.font == 0) {
+        g.setFont("5x9Numeric7Seg:1x2");
+      } else if (config.font == 1) {
         g.setFont("Teletext5x9Ascii:1x2");
-      } else if (config.font == 2) {
-        g.setFont("4x5");
       } else {
         // Default to this if no other font is set.
-        g.setFont("5x9Numeric7Seg:1x2");
+        g.setFont("6x8:1x2");
       }
       g.drawString(text, this.x+1, this.y+12);
 
@@ -101,8 +109,9 @@
       clearTimeout(this.timeoutId);
     }
     this.timeoutId = setTimeout(()=>{
-      WIDGETS["widalarmeta"].timeoutId = undefined;
-      WIDGETS["widalarmeta"].draw(true);
+      var w = WIDGETS["widalarmeta"];
+      w.timeoutId = undefined;
+      w.draw(w, true);
     }, timeout);
   } /* draw */
 
@@ -111,7 +120,12 @@
     WIDGETS["widalarmeta"]={
       area:"tl",
       width: 0, // hide by default = assume no timer
-      draw:draw
+      draw:draw,
+      reload: () => {
+        loadSettings();
+        g.clear();
+        Bangle.drawWidgets();
+      },
     };
   }
 })();
