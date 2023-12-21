@@ -50,7 +50,7 @@ function resetSettings() {
       wakeOnBTN3: true,
       wakeOnFaceUp: false,
       wakeOnTouch: false,
-      wakeOnTwist: true,
+      wakeOnTwist: false,
       twistThreshold: 819.2,
       twistMaxY: -800,
       twistTimeout: 1000
@@ -186,14 +186,14 @@ function showBLEMenu() {
         updateSettings();
       }
     },
-    /*LANG*/'Passkey BETA': {
+    /*LANG*/'Passkey': {
       value: settings.passkey?settings.passkey:/*LANG*/"none",
       onchange: () => setTimeout(showPasskeyMenu) // graphical_menu redraws after the call
     },
     /*LANG*/'Whitelist': {
       value:
         (
-          settings.whitelist_disabled ? /*LANG*/"off" : /*LANG*/"on"
+          (settings.whitelist_disabled || !settings.whitelist) ? /*LANG*/"off" : /*LANG*/"on"
         ) + (
           settings.whitelist
           ? " (" + settings.whitelist.length + ")"
@@ -383,6 +383,12 @@ function showWhitelistMenu() {
     NRF.on('connect', function(addr) {
       if (!settings.whitelist) settings.whitelist=[];
       delete settings.whitelist_disabled;
+      if (NRF.resolveAddress !== undefined) {
+        let resolvedAddr = NRF.resolveAddress(addr);
+        if (resolvedAddr !== undefined) {
+          addr = resolvedAddr + " (resolved)";
+        }
+      }
       settings.whitelist.push(addr);
       updateSettings();
       NRF.removeAllListeners('connect');
@@ -442,17 +448,35 @@ function showLCDMenu() {
         g.setRotation(settings.rotate&3,settings.rotate>>2).clear();
         Bangle.drawWidgets();
       }
-    },
-    /*LANG*/'Wake on BTN1': {
+    }
+  });
+
+  if (BANGLEJS2)
+    Object.assign(lcdMenu, {
+      /*LANG*/'Wake on Button': {
+        value: settings.options.wakeOnBTN1,
+        onchange: () => {
+          settings.options.wakeOnBTN1 = !settings.options.wakeOnBTN1;
+          updateOptions();
+        }
+      },
+      /*LANG*/'Wake on Tap': {
+        value: settings.options.wakeOnTouch,
+        onchange: () => {
+          settings.options.wakeOnTouch = !settings.options.wakeOnTouch;
+          updateOptions();
+        }
+      }
+    });
+  else
+    Object.assign(lcdMenu, {
+     /*LANG*/'Wake on BTN1': {
       value: settings.options.wakeOnBTN1,
       onchange: () => {
         settings.options.wakeOnBTN1 = !settings.options.wakeOnBTN1;
         updateOptions();
       }
-    }
-  });
-  if (!BANGLEJS2)
-    Object.assign(lcdMenu, {
+    },
     /*LANG*/'Wake on BTN2': {
       value: settings.options.wakeOnBTN2,
       onchange: () => {
@@ -466,19 +490,19 @@ function showLCDMenu() {
         settings.options.wakeOnBTN3 = !settings.options.wakeOnBTN3;
         updateOptions();
       }
+    },
+    /*LANG*/'Wake on Touch': {
+      value: settings.options.wakeOnTouch,
+      onchange: () => {
+        settings.options.wakeOnTouch = !settings.options.wakeOnTouch;
+        updateOptions();
+      }
     }});
   Object.assign(lcdMenu, {
     /*LANG*/'Wake on FaceUp': {
       value: settings.options.wakeOnFaceUp,
       onchange: () => {
         settings.options.wakeOnFaceUp = !settings.options.wakeOnFaceUp;
-        updateOptions();
-      }
-    },
-    /*LANG*/'Wake on Touch': {
-      value: settings.options.wakeOnTouch,
-      onchange: () => {
-        settings.options.wakeOnTouch = !settings.options.wakeOnTouch;
         updateOptions();
       }
     },
@@ -817,7 +841,7 @@ function showAppSettings(app) {
   try {
     appSettings = eval(appSettings);
   } catch (e) {
-    console.log(`${app.name} settings error:`, e)
+    console.log(`${app.name} settings error:`, e);
     return showError(/*LANG*/'Error in settings');
   }
   if (typeof appSettings !== "function") {
@@ -827,7 +851,7 @@ function showAppSettings(app) {
     // pass showAppSettingsMenu as "back" argument
     appSettings(()=>showAppSettingsMenu());
   } catch (e) {
-    console.log(`${app.name} settings error:`, e)
+    console.log(`${app.name} settings error:`, e);
     return showError(/*LANG*/'Error in settings');
   }
 }
@@ -893,6 +917,7 @@ function showTouchscreenCalibration() {
   }
 
   function touchHandler(_,e) {
+    E.stopEventPropagation&&E.stopEventPropagation();
     var spot = corners[currentCorner];
     // store averages
     if (spot[0]*2 < g.getWidth())
@@ -915,7 +940,7 @@ function showTouchscreenCalibration() {
     }
     showTapSpot();
   }
-  Bangle.on('touch', touchHandler);
+  Bangle.prependListener?Bangle.prependListener('touch',touchHandler):Bangle.on('touch',touchHandler);
 
   showTapSpot();
 }

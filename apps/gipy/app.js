@@ -2,44 +2,55 @@ let simulated = false;
 let displaying = false;
 let in_menu = false;
 let go_backwards = false;
-let zoomed = true;
 let status;
 
+let initial_options = Bangle.getOptions();
+
 let interests_colors = [
-  0xffff, // Waypoints, white
-  0xf800, // Bakery, red
-  0x001f, // DrinkingWater, blue
-  0x07ff, // Toilets, cyan
-  0x07e0, // Artwork, green
+  [1, 1, 1], // Waypoints, white
+  [1, 0, 0], // Bakery, red
+  [0, 0, 1], // DrinkingWater, blue
+  [0, 1, 1], // Toilets, cyan
+  [0, 1, 0], // Artwork, green
 ];
 
 let Y_OFFSET = 20;
+
+// some constants for screen types
+let MAP = 0;
+let HEIGHTS_ZOOMED_IN = 1;
+let HEIGHTS_FULL = 2;
+
 let s = require("Storage");
 
 var settings = Object.assign(
   {
     lost_distance: 50,
+    wake_up_speed: 13,
+    active_time: 10,
+    brightness: 0.5,
+    buzz_on_turns: false,
+    disable_bluetooth: false,
+    power_lcd_off: false,
+    powersave_by_default: false,
+    sleep_between_waypoints: false,
   },
   s.readJSON("gipy.json", true) || {}
 );
 
-let profile_start_times = [];
+let powersaving = settings.powersave_by_default;
 
-let splashscreen = require("heatshrink").decompress(
-  atob(
-    "2Gwgdly1ZATttAQfZARm2AQXbAREsyXJARmyAQXLAViDgARm2AQVbAR0kyVJAQ2yAQVLARZfBAQSD/ARXZAQVtARnbAQe27aAE5ICClgCMLgICCQEQCCkqDnARb+BAQW2AQyDEARdLAQeyAR3LAQSDXL51v+x9bfAICC7ICM23ZPpD4BAQXJn//7IFCAQ2yAQR6YQZOSQZpBBsiDZARm2AQVbAQSDIAQt///btufTAOyBYL+DARJrBAQSDWLJvvQYNlz/7tiAeEYICBtoCHQZ/+7ds//7tu2pMsyXJlmOnAFDyRoBAQSAWAQUlyVZAQxcBAQX//3ZsjIBWYUtBYN8uPHjqMeAQVbQZ/2QYXbQYNbQwRNBnHjyVLkhNBARvLAQSDLIgNJKZf/+1ZsjIBlmzQwXPjlwg8cux9YtoCD7ICCQZ192yDBIINt2f7tuSvED/0AgeOhMsyXJAQeyAQR6MARElyT+BAQ9lIIL+CsqDF21Ajlx4EAuPBQa4CIQZ0EQYNnAQNt2QCByU48f+nEAh05kuyC4L+DARJ3BAQSDJsmWpICEfwJQEkESoNl2wXByaDB2PAQYPHgEB4cgEYKDc7KDOkmAgMkyCABy3bsuegHjx/4QYM4sk27d/+XJlmSAQpcBAQSAKAQQ1BZAVZkoCHBYNIgEApMgEwcHQYUcgPHEYVv+SDaGQSDNAQZDByUbDQM48eOn/ggCDB23bIIICB/1LC4ICB2QCLPoICEfwNJARA1BAQZEDgEJkkyQAKDB/gCBQYUt+ACB/yDsAQVA8ESrKDC//+nIjB7dt/0bQYNJlmS5ICG2QCCcwQCGGQslAQdZAQ4RDQAPJQYUf//DGQKAB31LQYKeCQbmT//8QZlIQAM4QYkZQYe+raDCC4eyAQVLARaDBAoL4CAQNkz///4FCAQxWCp8AQAKDCjlwU4OCQYcv3yDfIAP/+SDM8EOQYOPCgOAhFl2CDB20bQwIUCfwICMLgICC2XLGQsnIISnDKAVZkoCDpKADAQUSoARBhcs2/Dlm2QbEEiFJggvBeAIAC5KDKpKDF8AIBgEAhMkw3LQYgCIfYICC2QCHCgl/IIf5smWpICIniDELgQdBoEAgVJkqDboMkiVBIAYABQZcjxyDB//4Bw2QRAIIEfAICC5ICM2XJkGSUgIXBIIvkEwklAQdZkiDD4IOBrILDC4UAQbYCBo5BF/iDKkiDB//+LgYCY2QCCpYCCkGCpEkwVPIIv/fwMkAQNkAQuRQYNwBAVZAQRoCRgSDcv5BG+RlLvHjQDHJAQUsAQ6DBhACBn5BG/wpOrMlARZuBAQSDRgEQgMAiJAGAAPJgmQpMEfbQCSpaDDx5BJCgVkAQWWARhoBAQR9SQY0AoEEv5BI/MkiVBPs0sAQfJAQUAQYQ5Bj4CB/hHEExz+BAQT+BARVlAQSDPAAKDJ/8EiFBAQeQQ0gCFkECgEj//HQYUcuPHIIXkwQaHfYICCsgCMrICCQByDFHwQAI/iDFiVBkkSQc3JIIfx46ACAQ1yhEgyUJAQImOrICCkoCLPQICCQZCCKAAXBQYYCFyFJgiGiIIX8QBACD4EgwVIkmCDo1kAQWWARh0BAQR9GQY8H8aDM/CDJiVBkkSQccHQBQCDgGChCGBAQOShImLfYICFfwICKsoCCQYcAQRn+n/8iEBgCGIAQWQQbtPQaMcuSDEwVIkmCEw77BAQVkARlZAQSACAQN/IIM/8f+nCCI8f//H/x0AgkAoCDJiVBkkSQbOT/8AgKANAQiDEAQsJkA1PrICCkoCIz5BBhyDBxyDJAAYOB/iZBAAMBgCGIAQdJgiDUFwKDUjkCQZEIkmCpApCsgCFywCLv9lAoNl//HQYk/P5Hjx4GE+CEDgkAoCDKoMkiQCBPpeT//8AoMnQYSARAQVwH4OAQxMgyUJAQQ7IfwICCrMlz48B+VZngsBgeP/CAIAAaDB8YGD/CEDAAMDMQUQgKJJyFJAQRKGEYK8BhIqCQCQCEgECgEggUIEAX8QwkkwVIHAz7BAQVkAQN/+KqCg4pCOIKDN/0/QwQADwCCCBYIRDoEEgCDHAQMkiQCBJQiABnHggE4VoSDXAQPAgEPKoyDCAQkJkCGFAQdPEYcBFIaAMABsDBA/8gEBgEQgKGIAQNJgmSnCDDhwFDQbICBv5MI5CGFkmCpCACsgCCyImJfAYAOCIPjBA4TI8kAoCDKoMnPQJ9CgeAAQKDdAQMfHgXxBYl+QYYCEhMgyUJngRBgAAHf6R6Cx4FCnALDxyGC/BuCAQVAFoUQgKDEoARF8EOgACBiSDdjlwg4LIpMkhSGHo8cQJEkyRuDABxcBQwaDBMoIFCEYMONwY+BnFL12SoEgoEEgCDCCIfjwE4gYCBhMk2SDeuPAIQKGDFIOSIgICCyCDDwPAQY8SCgXjQaL4FAowAB+EAgYIB9cu3Xrlmy5JECGwIOCDQYCC0gOBCgKAbuB9DAQUAgPHQAgCEkUHP4wABTAplDABaSDPogCDEgMOQwX6r/+QYJrB5csySDCpaAIx06pYUEQbUAAQQABBAPSpF145uFAQOXjkB4ACCC4VIgCVGQYf+n7+FAgYLFMonghyrEh0SpeuyVIkmypEgF4MuQBE49IRB9euQYWyQbUcdw0HNYoCCpFwg8AAQYVDSo6DDKAKDLnAFF8EAfYOAgHj1gjBRIPjlxrDGQOQQBACBnVLl269esQbhrBhMh4BoEw8dNwslDQvAjkBAQKAHQYn4QZHjx4EBL4IJCMokA9ck3ED1xoBlmS8LyB5MgRgSAIAQOkPoIaD2VLlmCQbF0L4ZrLrgUBgCYBAQYABTYgCGPQwAELgX//xfBAQRlCxmS9euyTsCdISABAQKPBQBOOnVJCgKDCC4cgQbEAMpQCDkoaHgPAjkEDRj4C8aGCQY4CGwm48EEMoOscwQFBAQNIkApBhyAInCABTwSbB1waCAoMk2SDVuj1BAQJoLrgXFuEHgFwgUJTxpWDfASADn5iFgYCBgEO2XpLgPL0mSMQOSF4UIkmQTxOOiCYCQYIdBAQUuQYILBPprjBAoMAAQUAMplJkojKuAaNQYoCCQY47BnHgeQPggG69aDENwOChEgwUJCIKDKTAKDCAQKDC5Ms3XIkCDFPQYCE4VcIQIABi8cMptIU5UADRqDHgHj/xiG9JBDiXj0hlB1hrB0mCEAKABkmQDQihDAQQyCPQOyTYIdB1iGBBANIAQMcgLaCgBiIKwtdMpmHDpApBQB4CCeoXhh0QQY+Q9ek3Xr1z+BcYLsDQYKABEYIgBDQYgE9eOiQXCAQI4DQwIIBkmyhYLBgBZBjpZBL4clMQhlQpCAIAQMJQacAgiDBl26L4M6fYO4AoJ3BxgCB126pekL4fJkGChEgyT+FAQvpF4PJOgKDBwR6BUgYCCBwOygB6BVQR9BgVckmXjkAMSIUBQZPSQCKDDl04eoKDDoeu3DmBfYRZBSQLpCQYIdBQYJcBPomP/AFDwm4fYXJkmCpACBHAOy5CPCBAMJCIMJkPCI4VcuESeQcBMqCAJAQNwQCQCCheunT4CoeAiXr1m69MAmSDDcAlLL4MIkGSpb+E8f+AoihBVoXLCgL7C9csDodJAoMLQYZ3DrkAKAkgRIYCLQBICCuiDWPQKDCcYL4BBAaJCBAMsLgWShKDCkmQPQgCG8L7B5aDDAoaDBTwKJC1ytDI4tIL4qPEARMlQBVxDRoCKbQXol2y9JxBpaDBKASJB2TmBQAkgwVJhx9Ex/4QYkQDoVLF4IjFQAXIkizCFgSDGASlcQBICBuAmYpcuJQICCcYRZBL4YIB5MgQYKABQYOSfwvj/wFD8MAPoIgEhICB5L4FQYQRBRIKDaw6AJAQMBVTLRCJQSDCAoTpDPoKDCQAOCDQKAEAQ8LlhxCyRxChCnCliPB1wOBEYI7C5ACBQbCAKjdtwCqZQYZTDAoSDBBYtJLgKDBC4J9F//4AoXbtuwpcuOgIdBfYL4DEwOS9aDBFIOC5ckAQMuQbCAIAQPG7VtmiDbkGy5IFB5KGDAQYIChKDCkm4fwv/Aoc27dp01L0gmCwXr1gjDDoIFB1ytBBwIRCBARZVkqAIAQX2YoMwQbbdB5L1BhJZBboR9BAoSABQYNJhyADAQ2P2xBBw9LPoNIC4KDBOIIvB5B6CAoICBEwIFB9aDWriAJAQRBCnCDgbQJQCwUJlzdCBYWQPov//yDFYoXHof8EwRxBFgJ3CEYOC5KwBQYVLl26SoZWSw6AKAQMB/5KCjsEQbICBLgO65JWBhJWBpbUEd4J6Ex0//6JEoel4BCB48IDoPrkiGBAQa2CWASDBBAQvBSoZWRQBYCBpMF/8DI4NAQCyDEwT4BZwJTBBYJQBl2ShIOBhZ6EfwP/RIk68eBQQKDBgKDCeoPIFgYpBBYIFCQYXLQAPr1iDSQBYCB6VIurFB/04pf0QbFJkGChMsQYOucwRTCBwW4PQgCB//4BAkQYoUcv/CpMMEAOu3QgBwVIF4QpCAoPJAoICB2SGCKB8lQBaDDKYOS/+kWwaDZJQLOCcYLRByVLcAUOQAmPQAoCCEAME3UJZANBDQPJlxxD5AvBQZFIQadIQBgCBF4NIkrCBkkSQDCDE5ZKB9YCBRIJcBLIMDPQv/QY+uPQMEiVBgmyhBrCAQIpBU4R0DPQOCBwY7BBwIIBKBqAMkoCBCgeQpApBQb5oBAQSDBhEg3B6F//+QAmEyCDBTYWyfAL+BFIQgBF4SDCQAIFE126QYQUBQZp0CQZd0y4UCpB9aAQihCKYSJCFIOChEuPQmOn//RIiDB3VJlz+CTYRxBJRCDF1g1B1myRIOCTwKDMpCALQYYUEQcACBdISDBwSMBwVDPQuP/6JEQYfrdgIjC5CDD2QFBF4Wy5ICDQYOu2XrQYKPBQYI1BJpaAMAQVwQchWCAoZKBdgO4PQwCJPQMu3RxCPoyqB5YCCFgeyQYKeBBYNIQZ0lQBoCCuiDkLIRlCJQUIhyAOnHpDoRuBfAZoCQAosEpAUBBAKDB1iDBBYNLkiDJpCAOAQMJPr4CFJoLXCyUIMoMDQBoCB3FL1gdBNwPrEYSGCQAQFDBYaDDAoKPCQYcsQZKAOjskw6AjAQREBQYuAPQ3//AIFoeu3VLAQSDCRIQmB9ekFgSDBGQe6PQKABGQIOCAQQ+DJQ2HQZvXQEwCDIgMJkGCQYL+G//+BAs6QAL1C3TvDQYJoCRIOCpYsBhYIBpEuCga2BfwdLBYUsRIRHEkKALAQXCrqDuhaAEAQM//4IGQYW6QYKABQYQFBQYXLSQMLkgmBBAMIO4UgGoICCQYQjBQZFcQBgCDQE4CBhJWCQYJ3EAQOP/4IGAQKbBL4RlBeQQCCQYR6B9esR4fIBANLQAeCDQOShaDJy6AOQY+CMQaDgAQKDB3CDQiXJO4PJEARiBQwQICNYKDDpYOBC4IRDBAIRCQYYaBQYklQB6DFpCDBQAazDATcIEwICBfY3j//4QY86MQSDDfwREDwXLNYPrPoQUBQASPD1wLDQZMhQaEgwCDEMoiDfpBfBhMOQY3//yMHeQIdDdgZuBPQILBwRrCQwQCB3SDCpcuBAJ9BDQKGCAQJEFQBwCBjt0PRkJQbkIQYMDfYwCJ8JcBcAaDBQARrCQYYICQYnrTwPLQYKGBTYYaCCIOCIgSAOQYbdDQdSAO8eunFBPoKDByTmBQYOkRgIFBEwSDC5MgBYR6B1x3BAQQIBQAXIEASDDy6DPkmHpAXDTwZlGQb24QZ+kyFLOgSDD2RiBPoYmCKYL1DBYSACpcufwQCBSQKDD1hoCw6DPkvXLgiDpPQ3//yDIdgJcBfwVL0h3CyRuCFIiDDAQSYCUIJ9BCIMLQYwaBkqANAQV16S2EMQqJDBY6DWlx6Fn//QAoCCwkyQYJ3BlxfB0iACQZCVDfwYFBpJ9CBwMJRIQRC1gdBQBwCCuAvDO4cgQYgFBQbsLO4uP/6AGAQPhhxWBQYe6QAXJEw4LDOIRNBQYXIQYMIQYYIBBYNLFINIQaEJQYIdCHAaDCAQqDcgZ6F/6DJpYyCLgPrkm6EAiMBQY5TGfwSDB5AOEboaDBQByDDkESQYogCEYYCfO4qCB/CDI8ckiVLC4KDBPoQCBMQPr0gLB1jvCFgcIkGCKYOy5YLBQYQUCQa3CQASDIQECDHn///yAHx069ZWBOIXL1zyDBYO65esAoICBhIUBNwKDCQAKDEDQYgDQbB6jQZ6AGQYfBQYZoBl265JuCkm6PQQFBwUIBYPJBAKJC5MgBwKDCRgKDBSoWCCISDQ6VBL5AsBAoVIQceP/6DKiR6CO4QaBQYQjGQYRHBPoILDQYWCRgVIQYNL126RgOyeQOCQZ50EC4OSWwImCQwaDkQQKAHAQOEEaR9BQYTRGKwOCpaDBhCDBR4SDCBwSDPuAmCwSDCAQQ1DQwSDiQQKDKx0SFjSDFBASDCcwQRDBwIA="
-  )
-);
+// let profile_start_times = [];
 
-function start_profiling() {
-  profile_start_times.push(getTime());
-}
+// function start_profiling() {
+//   profile_start_times.push(getTime());
+// }
 
-function end_profiling(label) {
-  let end_time = getTime();
-  let elapsed = end_time - profile_start_times.pop();
-  console.log("profile:", label, "took", elapsed);
-}
+// function end_profiling(label) {
+//   let end_time = getTime();
+//   let elapsed = end_time - profile_start_times.pop();
+//   console.log("profile:", label, "took", elapsed);
+// }
 
 // return the index of the largest element of the array which is <= x
 function binary_search(array, x) {
@@ -143,7 +154,6 @@ class TilesOffsets {
 
 class Map {
   constructor(buffer, offset, filename) {
-    this.points_cache = []; // don't refetch points all the time
     // header
     let color_array = Uint8Array(buffer, offset, 3);
     this.color = [
@@ -152,7 +162,7 @@ class Map {
       color_array[2] / 255,
     ];
     offset += 3;
-    this.first_tile = Uint32Array(buffer, offset, 2); // absolute tile id of first tile
+    this.first_tile = Int32Array(buffer, offset, 2); // absolute tile id of first tile
     offset += 2 * 4;
     this.grid_size = Uint32Array(buffer, offset, 2); // tiles width and height
     offset += 2 * 4;
@@ -231,109 +241,16 @@ class Map {
     // offset += encoded_blocks_size;
   }
 
-  display(
-    displayed_x,
-    displayed_y,
-    scale_factor,
-    cos_direction,
-    sin_direction
-  ) {
-    g.setColor(this.color[0], this.color[1], this.color[2]);
-    let local_x = displayed_x - this.start_coordinates[0];
-    let local_y = displayed_y - this.start_coordinates[1];
-    let tile_x = Math.floor(local_x / this.side);
-    let tile_y = Math.floor(local_y / this.side);
-    let limit = 1;
-    if (!zoomed) {
-      limit = 2;
-    }
-    for (let y = tile_y - limit; y <= tile_y + limit; y++) {
-      if (y < 0 || y >= this.grid_size[1]) {
-        continue;
-      }
-      for (let x = tile_x - limit; x <= tile_x + limit; x++) {
-        if (x < 0 || x >= this.grid_size[0]) {
-          continue;
-        }
-        if (
-          this.tile_is_on_screen(
-            x,
-            y,
-            local_x,
-            local_y,
-            scale_factor,
-            cos_direction,
-            sin_direction
-          )
-        ) {
-          if (this.color[0] == 1 && this.color[1] == 0 && this.color[2] == 0) {
-            this.display_thick_tile(
-              x,
-              y,
-              local_x,
-              local_y,
-              scale_factor,
-              cos_direction,
-              sin_direction
-            );
-          } else {
-            this.display_tile(
-              x,
-              y,
-              local_x,
-              local_y,
-              scale_factor,
-              cos_direction,
-              sin_direction
-            );
-          }
-        }
-      }
-    }
-  }
+  add_to_tile_image(img, absolute_tile_x, absolute_tile_y) {
+    let tile_x = absolute_tile_x - this.first_tile[0];
+    let tile_y = absolute_tile_y - this.first_tile[1];
+    let side = img.getWidth() - 6;
 
-  tile_is_on_screen(
-    tile_x,
-    tile_y,
-    current_x,
-    current_y,
-    scale_factor,
-    cos_direction,
-    sin_direction
-  ) {
-    let center_x = g.getWidth() / 2;
-    let center_y = g.getHeight() / 2 + Y_OFFSET;
-    let side = this.side;
-    let x1 = tile_x * side;
-    let y1 = tile_y * side;
-    let x2 = x1 + side;
-    let y2 = y1 + side;
-    let scaled_x1 = (x1 - current_x) * scale_factor;
-    let scaled_y1 = (y1 - current_y) * scale_factor;
-    let rotated_x1 = scaled_x1 * cos_direction - scaled_y1 * sin_direction;
-    let rotated_y1 = scaled_x1 * sin_direction + scaled_y1 * cos_direction;
-    let scaled_x2 = (x2 - current_x) * scale_factor;
-    let scaled_y2 = (y2 - current_y) * scale_factor;
-    let rotated_x2 = scaled_x2 * cos_direction - scaled_y2 * sin_direction;
-    let rotated_y2 = scaled_x2 * sin_direction + scaled_y2 * cos_direction;
+    let thick = this.color[0] != 0;
+    img.setColor(this.color[0], this.color[1], this.color[2]);
 
-    if (center_x < rotated_x1 && center_x < rotated_x2) {
-      return false;
-    }
-    if (-center_x > rotated_x1 && -center_x > rotated_x2) {
-      return false;
-    }
+    let tile_num = tile_x + tile_y * this.grid_size[0];
 
-    if (center_y < rotated_y1 && center_y < rotated_y2) {
-      return false;
-    }
-    if (-center_y > rotated_y1 && -center_y > rotated_y2) {
-      return false;
-    }
-    return true;
-  }
-
-  tile_points(tile_num, tile_x, tile_y, scaled_side) {
     let line_start_offset = this.tiles_offsets.tile_start_offset(
       tile_y * this.grid_size[0]
     );
@@ -343,123 +260,44 @@ class Map {
       this.tiles_offsets.tile_end_offset(tile_num) - line_start_offset;
 
     let line = this.binary_lines[tile_y];
-    // we need to copy both for correct results and for performances
-    // let's precompute also.
-    let cached_tile = new Float64Array(upper_limit - offset);
-    for (let i = offset; i < upper_limit; i += 2) {
-      let x = (tile_x + line.buffer[i] / 255) * scaled_side;
-      let y = (tile_y + line.buffer[i + 1] / 255) * scaled_side;
-      cached_tile[i - offset] = x;
-      cached_tile[i + 1 - offset] = y;
-    }
-    return cached_tile;
-  }
+    for (let i = offset; i < upper_limit; i += 4) {
+      let x1 = (line.buffer[i] / 255) * side + 3;
+      let y1 = ((255 - line.buffer[i + 1]) / 255) * side + 3;
+      let x2 = (line.buffer[i + 2] / 255) * side + 3;
+      let y2 = ((255 - line.buffer[i + 3]) / 255) * side + 3;
 
-  invalidate_caches() {
-    this.points_cache = [];
-  }
-
-  fetch_points(tile_x, tile_y, scaled_side) {
-    let tile_num = tile_x + tile_y * this.grid_size[0];
-    for (let i = 0; i < this.points_cache.length; i++) {
-      if (this.points_cache[i][0] == tile_num) {
-        return this.points_cache[i][1];
+      let thickness = 1;
+      if (thick) {
+        thickness = 3.5;
       }
-    }
-    if (this.points_cache.length > 40) {
-      this.points_cache.shift();
-    }
-    let points = this.tile_points(tile_num, tile_x, tile_y, scaled_side);
-    this.points_cache.push([tile_num, points]);
-    return points;
-  }
 
-  display_tile(
-    tile_x,
-    tile_y,
-    current_x,
-    current_y,
-    scale_factor,
-    cos_direction,
-    sin_direction
-  ) {
-      "jit";
-    let center_x = g.getWidth() / 2;
-    let center_y = g.getHeight() / 2 + Y_OFFSET;
-
-    let points = this.fetch_points(tile_x, tile_y, this.side * scale_factor);
-    let scaled_current_x = current_x * scale_factor;
-    let scaled_current_y = current_y * scale_factor;
-
-    for (let i = 0; i < points.length; i += 4) {
-      let scaled_x = points[i] - scaled_current_x;
-      let scaled_y = points[i + 1] - scaled_current_y;
-      let rotated_x = scaled_x * cos_direction - scaled_y * sin_direction;
-      let rotated_y = scaled_x * sin_direction + scaled_y * cos_direction;
-      let final_x = center_x - rotated_x;
-      let final_y = center_y + rotated_y;
-      scaled_x = points[i + 2] - scaled_current_x;
-      scaled_y = points[i + 3] - scaled_current_y;
-      rotated_x = scaled_x * cos_direction - scaled_y * sin_direction;
-      rotated_y = scaled_x * sin_direction + scaled_y * cos_direction;
-      let new_final_x = center_x - rotated_x;
-      let new_final_y = center_y + rotated_y;
-      g.drawLine(final_x, final_y, new_final_x, new_final_y);
-    }
-  }
-
-  display_thick_tile(
-    tile_x,
-    tile_y,
-    current_x,
-    current_y,
-    scale_factor,
-    cos_direction,
-    sin_direction
-  ) {
-    let center_x = g.getWidth() / 2;
-    let center_y = g.getHeight() / 2 + Y_OFFSET;
-
-    let points = this.fetch_points(tile_x, tile_y, this.side * scale_factor);
-    let scaled_current_x = current_x * scale_factor;
-    let scaled_current_y = current_y * scale_factor;
-
-    for (let i = 0; i < points.length; i += 4) {
-      let scaled_x = points[i] - scaled_current_x;
-      let scaled_y = points[i + 1] - scaled_current_y;
-      let rotated_x = scaled_x * cos_direction - scaled_y * sin_direction;
-      let rotated_y = scaled_x * sin_direction + scaled_y * cos_direction;
-      let final_x = center_x - rotated_x;
-      let final_y = center_y + rotated_y;
-      scaled_x = points[i + 2] - scaled_current_x;
-      scaled_y = points[i + 3] - scaled_current_y;
-      rotated_x = scaled_x * cos_direction - scaled_y * sin_direction;
-      rotated_y = scaled_x * sin_direction + scaled_y * cos_direction;
-      let new_final_x = center_x - rotated_x;
-      let new_final_y = center_y + rotated_y;
-
-      let xdiff = new_final_x - final_x;
-      let ydiff = new_final_y - final_y;
+      let xdiff = x2 - x1;
+      let ydiff = y2 - y1;
       let d = Math.sqrt(xdiff * xdiff + ydiff * ydiff);
-      let ox = (-ydiff / d) * 3;
-      let oy = (xdiff / d) * 3;
-      g.fillPoly([
-        final_x + ox,
-        final_y + oy,
-        new_final_x + ox,
-        new_final_y + oy,
-        new_final_x - ox,
-        new_final_y - oy,
-        final_x - ox,
-        final_y - oy,
+      let ox = (-ydiff / d) * thickness;
+      let oy = (xdiff / d) * thickness;
+      img.fillPoly([
+        x1 + ox,
+        y1 + oy,
+        x2 + ox,
+        y2 + oy,
+        x2 - ox,
+        y2 - oy,
+        x1 - ox,
+        y1 - oy,
       ]);
+
+      // } else {
+      // img.drawLine(x1, y1, x2, y2);
+
+      // }
     }
   }
 }
 
 class Interests {
   constructor(buffer, offset) {
-    this.first_tile = Uint32Array(buffer, offset, 2); // absolute tile id of first tile
+    this.first_tile = Int32Array(buffer, offset, 2); // absolute tile id of first tile
     offset += 2 * 4;
     this.grid_size = Uint32Array(buffer, offset, 2); // tiles width and height
     offset += 2 * 4;
@@ -479,136 +317,61 @@ class Interests {
       this.binary_interests[i] = binary_interests[i];
     }
     offset += end;
-    this.points_cache = [];
     return [this, offset];
   }
 
-  display(
-    displayed_x,
-    displayed_y,
-    scale_factor,
-    cos_direction,
-    sin_direction
-  ) {
-    let local_x = displayed_x - this.start_coordinates[0];
-    let local_y = displayed_y - this.start_coordinates[1];
-    let tile_x = Math.floor(local_x / this.side);
-    let tile_y = Math.floor(local_y / this.side);
-    for (let y = tile_y - 1; y <= tile_y + 1; y++) {
-      if (y < 0 || y >= this.grid_size[1]) {
-        continue;
-      }
-      for (let x = tile_x - 1; x <= tile_x + 1; x++) {
-        if (x < 0 || x >= this.grid_size[0]) {
-          continue;
-        }
-        this.display_tile(
-          x,
-          y,
-          local_x,
-          local_y,
-          scale_factor,
-          cos_direction,
-          sin_direction
-        );
-      }
-    }
-  }
+  add_to_tile_image(img, absolute_tile_x, absolute_tile_y) {
+    let tile_x = absolute_tile_x - this.first_tile[0];
+    let tile_y = absolute_tile_y - this.first_tile[1];
+    let side = img.getWidth() - 6;
 
-  tile_points(tile_num, tile_x, tile_y, scaled_side) {
+    let tile_num = tile_x + tile_y * this.grid_size[0];
+
     let offset = this.offsets.tile_start_offset(tile_num);
     let upper_limit = this.offsets.tile_end_offset(tile_num);
 
-    let tile_interests = [];
+    let buffer = this.binary_interests;
     for (let i = offset; i < upper_limit; i += 3) {
-      let interest = this.binary_interests[i];
-      let x = (tile_x + this.binary_interests[i + 1] / 255) * scaled_side;
-      let y = (tile_y + this.binary_interests[i + 2] / 255) * scaled_side;
-      if (interest >= interests_colors.length) {
-        throw "bad interest" + interest + "at" + tile_num + "offset" + i;
-      }
-      tile_interests.push(interest);
-      tile_interests.push(x);
-      tile_interests.push(y);
-    }
-    return tile_interests;
-  }
-  fetch_points(tile_x, tile_y, scaled_side) {
-    //TODO: factorize with map ?
-    let tile_num = tile_x + tile_y * this.grid_size[0];
-    for (let i = 0; i < this.points_cache.length; i++) {
-      if (this.points_cache[i][0] == tile_num) {
-        return this.points_cache[i][1];
-      }
-    }
-    if (this.points_cache.length > 40) {
-      this.points_cache.shift();
-    }
-    let points = this.tile_points(tile_num, tile_x, tile_y, scaled_side);
-    this.points_cache.push([tile_num, points]);
-    return points;
-  }
-  invalidate_caches() {
-    this.points_cache = [];
-  }
-  display_tile(
-    tile_x,
-    tile_y,
-    displayed_x,
-    displayed_y,
-    scale_factor,
-    cos_direction,
-    sin_direction
-  ) {
-    let width = g.getWidth();
-    let half_width = width / 2;
-    let half_height = g.getHeight() / 2 + Y_OFFSET;
-    let interests = this.fetch_points(tile_x, tile_y, this.side * scale_factor);
-
-    let scaled_current_x = displayed_x * scale_factor;
-    let scaled_current_y = displayed_y * scale_factor;
-
-    for (let i = 0; i < interests.length; i += 3) {
-      let type = interests[i];
-      let x = interests[i + 1];
-      let y = interests[i + 2];
-
-      let scaled_x = x - scaled_current_x;
-      let scaled_y = y - scaled_current_y;
-      let rotated_x = scaled_x * cos_direction - scaled_y * sin_direction;
-      let rotated_y = scaled_x * sin_direction + scaled_y * cos_direction;
-      let final_x = half_width - rotated_x;
-      let final_y = half_height + rotated_y;
+      let type = buffer[i];
+      let x = (buffer[i + 1] / 255) * side + 3;
+      let y = ((255 - buffer[i + 2]) / 255) * side + 3;
 
       let color = interests_colors[type];
       if (type == 0) {
-        g.setColor(0, 0, 0).fillCircle(final_x, final_y, 6);
+        img.setColor(0, 0, 0).fillCircle(x, y, 6);
       }
-      g.setColor(color).fillCircle(final_x, final_y, 5);
+      img.setColor(color[0], color[1], color[2]).fillCircle(x, y, 5);
     }
   }
 }
 
 class Status {
-  constructor(path, maps, interests) {
+  constructor(path, maps, interests, heights) {
     this.path = path;
+    this.default_options = true; // do we still have default options ?
+    this.active = true; // should we have screen on
+    this.last_activity = getTime();
     this.maps = maps;
     this.interests = interests;
-    let half_screen_width = g.getWidth() / 2;
-    let half_screen_height = g.getHeight() / 2;
-    let half_screen_diagonal = Math.sqrt(
-      half_screen_width * half_screen_width +
-        half_screen_height * half_screen_height
-    );
-    this.scale_factor = half_screen_diagonal / maps[0].side; // multiply geo coordinates by this to get pixels coordinates
+    this.heights = heights;
+    this.screen = MAP;
     this.on_path = true; // are we on the path or lost ?
     this.position = null; // where we are
-    this.adjusted_cos_direction = 1; // cos of where we look at
-    this.adjusted_sin_direction = 0; // sin of where we look at
+    this.direction = 0;
+    this.adjusted_cos_direction = Math.cos(-Math.PI / 2.0);
+    this.adjusted_sin_direction = Math.sin(-Math.PI / 2.0);
+    this.zoomed_in = true;
+
     this.current_segment = null; // which segment is closest
     this.reaching = null; // which waypoint are we reaching ?
     this.distance_to_next_point = null; // how far are we from next point ?
     this.projected_point = null;
+    this.reset_images_cache();
+
+    let width = g.getWidth();
+    let height = g.getHeight();
+    let diagonal_third = Math.sqrt(width * width + height * height) / 3;
+    this.scale_factor = diagonal_third / maps[0].side; // multiply geo coordinates by this to get pixels coordinates
 
     if (this.path !== null) {
       let r = [0];
@@ -630,12 +393,54 @@ class Status {
     this.old_points = []; // record previous points but only when enough distance between them
     this.old_times = []; // the corresponding times
   }
-  invalidate_caches() {
-    for (let i = 0; i < this.maps.length; i++) {
-      this.maps[i].invalidate_caches();
+  reset_images_cache() {
+    let tiles_per_diagonals = this.zoomed_in ? 3 : 5;
+    let screen_width = g.getWidth();
+    let screen_height = g.getHeight();
+    this.images_cache = [];
+
+    let img_side =
+      Math.ceil(
+        Math.sqrt(screen_width * screen_width + screen_height * screen_height) /
+          tiles_per_diagonals
+      ) + 6; // three extra pixels on each side to allow thick lines
+
+    E.defrag();
+    let limit = tiles_per_diagonals * (tiles_per_diagonals + 1);
+
+    for (let i = 0; i < limit; i++) {
+      let img = Graphics.createArrayBuffer(img_side, img_side, 4, {
+        msb: true,
+      });
+      this.images_cache.push({ image: img, x: -1, y: -1 });
     }
-    if (this.interests !== null) {
-      this.interests.invalidate_caches();
+  }
+  activate() {
+    if (!powersaving) {
+      return;
+    }
+    this.last_activity = getTime();
+    if (this.active) {
+      return;
+    } else {
+      this.active = true;
+      Bangle.setLCDBrightness(settings.brightness);
+      Bangle.setLocked(false);
+      if (settings.power_lcd_off) {
+        Bangle.setLCDPower(true);
+      }
+    }
+  }
+  check_activity() {
+    if (!this.active || !powersaving) {
+      return;
+    }
+    if (getTime() - this.last_activity > settings.active_time) {
+      this.active = false;
+      Bangle.setLCDBrightness(0);
+      if (settings.power_lcd_off) {
+        Bangle.setLCDPower(false);
+      }
     }
   }
   new_position_reached(position) {
@@ -652,8 +457,12 @@ class Status {
     } else {
       let previous_point = this.old_points[this.old_points.length - 1];
       let distance_to_previous = previous_point.distance(position);
-      // gps signal is noisy but rarely above 4 meters
-      if (distance_to_previous < 4) {
+      // gps signal is noisy but rarely above 5 meters
+      if (distance_to_previous < 5) {
+        // update instant speed and return
+        let oldest_point = this.old_points[0];
+        let distance_to_oldest = oldest_point.distance(position);
+        this.instant_speed = distance_to_oldest / (now - this.old_times[0]);
         return null;
       }
     }
@@ -663,11 +472,14 @@ class Status {
 
     let oldest_point = this.old_points[0];
     let distance_to_oldest = oldest_point.distance(position);
+    let time_to_oldest = now - this.old_times[0];
 
     // every 3 points we count the distance
     if (this.gps_coordinates_counter % 3 == 0) {
-      if (distance_to_oldest < 150.0) {
-        // to avoid gps glitches
+      if (time_to_oldest > 6 || distance_to_oldest < 150.0) {
+        // to avoid gps glitches (sometimes the gps signal will make you jump around)
+        // however if gps disconnects (time_to_oldest becomes large) we still count the distance
+        // when it re-activates
         this.advanced_distance += distance_to_oldest;
       }
     }
@@ -687,18 +499,41 @@ class Status {
     let angle = Math.atan2(diff.lat, diff.lon);
     return angle;
   }
-  update_position(new_position, maybe_direction, timestamp) {
+  update_position(new_position) {
     let direction = this.new_position_reached(new_position);
     if (direction === null) {
-      if (maybe_direction === null) {
-        return;
-      } else {
-        direction = maybe_direction;
+      if (this.old_points.length > 1) {
+        this.display(); // re-display because speed has changed
       }
+      return;
     }
+    this.direction = direction;
     if (in_menu) {
       return;
     }
+    if (this.instant_speed * 3.6 < settings.wake_up_speed) {
+      this.activate(); // if we go too slow turn on, we might be looking for the direction to follow
+      if (!this.default_options) {
+        this.default_options = true;
+        Bangle.setOptions(initial_options);
+      }
+    } else {
+      if (this.default_options && powersaving) {
+        this.default_options = false;
+
+        Bangle.setOptions({
+          lockTimeout: 0,
+          backlightTimeout: 0,
+          lcdPowerTimeout: 0,
+          hrmSportMode: 2,
+          wakeOnTwist: false, // if true watch will never sleep due to speed and road bumps. tried several tresholds.
+          wakeOnFaceUp: false,
+          wakeOnTouch: true,
+          powerSave: false,
+        });
+      }
+    }
+    this.check_activity(); // if we don't move or are in menu we should stay on
 
     this.adjusted_cos_direction = Math.cos(-direction - Math.PI / 2.0);
     this.adjusted_sin_direction = Math.sin(-direction - Math.PI / 2.0);
@@ -715,46 +550,26 @@ class Status {
       new_position.lat + sin_direction * this.instant_speed * 0.00001
     );
 
-    // abort if we are late
-    // if (timestamp !== null) {
-    //   let elapsed = Date.now() - timestamp;
-    //   if (elapsed > 1000) {
-    //     console.log("we are late");
-    //     return;
-    //   }
-    //     console.log("we are not late");
-    // }
-
-    // // abort most frames if locked
-    // if (Bangle.isLocked() && this.gps_coordinates_counter % 5 != 0) {
-    //     console.log("we are filtered");
-    //   return;
-    // }
-
     if (this.path !== null) {
       // detect segment we are on now
-      let res = this.path.nearest_segment(
+      let next_segment = this.path.nearest_segment(
         this.displayed_position,
         Math.max(0, this.current_segment - 1),
         Math.min(this.current_segment + 2, this.path.len - 1),
         cos_direction,
         sin_direction
       );
-      let orientation = res[0];
-      let next_segment = res[1];
 
       if (this.is_lost(next_segment)) {
         // start_profiling();
         // it did not work, try anywhere
-        res = this.path.nearest_segment(
+        next_segment = this.path.nearest_segment(
           this.displayed_position,
           0,
           this.path.len - 1,
           cos_direction,
           sin_direction
         );
-        orientation = res[0];
-        next_segment = res[1];
         // end_profiling("repositioning");
       }
       // now check if we strayed away from path or back to it
@@ -769,11 +584,14 @@ class Status {
         }
         this.on_path = !lost;
       }
+      if (!this.on_path) {
+        this.activate();
+      }
 
       this.current_segment = next_segment;
 
       // check if we are nearing the next point on our path and alert the user
-      let next_point = this.current_segment + (1 - orientation);
+      let next_point = this.current_segment + (go_backwards ? 0 : 1);
       this.distance_to_next_point = Math.ceil(
         this.position.distance(this.path.point(next_point))
       );
@@ -789,20 +607,29 @@ class Status {
       //     }, time_to_next_point);
       //   }
       // }
-      if (this.reaching != next_point && this.distance_to_next_point <= 100) {
-        this.reaching = next_point;
-        let reaching_waypoint = this.path.is_waypoint(next_point);
-        if (reaching_waypoint) {
-          Bangle.buzz();
-          setTimeout(() => Bangle.buzz(), 500);
-          setTimeout(() => Bangle.buzz(), 1000);
-          setTimeout(() => Bangle.buzz(), 1500);
-          if (Bangle.isLocked()) {
-            Bangle.setLocked(false);
+      let reaching_waypoint = this.path.is_waypoint(next_point);
+      if (this.distance_to_next_point <= 100) {
+        if (reaching_waypoint || !settings.sleep_between_waypoints) {
+          this.activate();
+        }
+
+        if (this.reaching != next_point) {
+          this.reaching = next_point;
+          if (reaching_waypoint && settings.buzz_on_turns) {
+            Bangle.buzz();
+            setTimeout(() => Bangle.buzz(), 500);
+            setTimeout(() => Bangle.buzz(), 1000);
+            setTimeout(() => Bangle.buzz(), 1500);
           }
         }
       }
     }
+
+    // abort most frames if inactive
+    if (!this.active && this.gps_coordinates_counter % 5 != 0) {
+      return;
+    }
+
     // re-display
     this.display();
   }
@@ -826,21 +653,12 @@ class Status {
     direction = Math.atan2(diff.lat, diff.lon);
 
     let full_angle = direction - this.angle;
-    // let c = towards.coordinates(p, this.adjusted_cos_direction, this.adjusted_sin_direction, this.scale_factor);
-    // g.setColor(1,0,1).fillCircle(c[0], c[1], 5);
-
-    let scale;
-    if (zoomed) {
-      scale = this.scale_factor;
-    } else {
-      scale = this.scale_factor / 2;
-    }
 
     c = this.projected_point.coordinates(
       this.displayed_position,
       this.adjusted_cos_direction,
       this.adjusted_sin_direction,
-      scale
+      this.scale_factor
     );
 
     let cos1 = Math.cos(full_angle + 0.6 + Math.PI / 2);
@@ -865,14 +683,17 @@ class Status {
     ]);
   }
   remaining_distance() {
-    let remaining_in_correct_orientation =
-      this.remaining_distances[this.current_segment + 1] +
-      this.position.distance(this.path.point(this.current_segment + 1));
-
     if (go_backwards) {
-      return this.remaining_distances[0] - remaining_in_correct_orientation;
+      return (
+        this.remaining_distances[0] -
+        this.remaining_distances[this.current_segment] +
+        this.position.distance(this.path.point(this.current_segment))
+      );
     } else {
-      return remaining_in_correct_orientation;
+      return (
+        this.remaining_distances[this.current_segment + 1] +
+        this.position.distance(this.path.point(this.current_segment + 1))
+      );
     }
   }
   // check if we are lost (too far from segment we think we are on)
@@ -891,45 +712,274 @@ class Status {
       return false;
     }
   }
+
+  tile_image(absolute_tile_x, absolute_tile_y) {
+    // in the cache old images are front and recently used ones are back
+    let cached_img_index = this.images_cache.findIndex((i) => {
+      return i.x == absolute_tile_x && i.y == absolute_tile_y;
+    });
+    if (cached_img_index == -1) {
+      // console.log("loading", absolute_tile_x, absolute_tile_y);
+      let old_image = this.images_cache.shift();
+      this.compute_tile_image(old_image.image, absolute_tile_x, absolute_tile_y);
+      this.images_cache.push({
+        image: old_image.image,
+        x: absolute_tile_x,
+        y: absolute_tile_y,
+      });
+      return old_image.image;
+    } else {
+      let cached_img = this.images_cache.splice(cached_img_index, 1)[0];
+      this.images_cache.push(cached_img);
+      return cached_img.image;
+    }
+  }
+
+  compute_tile_image(img, absolute_tile_x, absolute_tile_y) {
+    img.transparent = img.toColor(1, 1, 1);
+    img.setBgColor(1, 1, 1).clear();
+
+    this.maps.forEach((m) => {
+      m.add_to_tile_image(img, absolute_tile_x, absolute_tile_y);
+    });
+    this.interests.add_to_tile_image(img, absolute_tile_x, absolute_tile_y);
+  }
+
+  display_map() {
+
+    // start_profiling();
+    let displayed_x = this.displayed_position.lon;
+    let displayed_y = this.displayed_position.lat;
+    let tile_x_coord = displayed_x / this.maps[0].side;
+    let tile_y_coord = displayed_y / this.maps[0].side;
+    let absolute_tile_x = Math.floor(tile_x_coord);
+    let absolute_tile_y = Math.floor(tile_y_coord);
+
+    let tiles_per_diagonals = this.zoomed_in ? 3 : 5;
+    let diagonal = Math.ceil(
+      Math.sqrt(g.getWidth() * g.getWidth() + g.getHeight() * g.getHeight()) /
+        tiles_per_diagonals
+    );
+    let angle = this.direction - Math.PI / 2;
+    let cos_direction = Math.cos(angle);
+    let sin_direction = Math.sin(angle);
+    let d = Math.floor(tiles_per_diagonals / 2);
+
+    for (let x = -d; x <= d; x++) {
+      for (let y = -d; y <= d; y++) {
+        let img = this.tile_image(absolute_tile_x + x, absolute_tile_y + y);
+
+        let screen_x =
+          (absolute_tile_x + x + 0.5 - tile_x_coord) * diagonal + 3;
+        let screen_y =
+          -(absolute_tile_y + y + 0.5 - tile_y_coord) * diagonal - 3;
+
+        let rotated_x = screen_x * cos_direction - screen_y * sin_direction;
+        let rotated_y = screen_x * sin_direction + screen_y * cos_direction;
+        let final_x = g.getWidth() / 2 + rotated_x;
+        let final_y = g.getHeight() / 2 + Y_OFFSET + rotated_y;
+
+        g.drawImage(img, final_x, final_y, { rotate: angle });
+      }
+    }
+    // end_profiling("map display");
+  }
   display() {
     if (displaying || in_menu) {
       return; // don't draw on drawings
     }
+    g.reset();
     displaying = true;
     g.clear();
-    let scale_factor = this.scale_factor;
-    if (!zoomed) {
-      scale_factor /= 2;
-    }
+    if (this.screen == MAP) {
+      this.display_map();
+      if (this.position !== null) {
+        // start_profiling();
+        this.display_path();
+        // end_profiling("path display");
+      }
 
-    // start_profiling();
-    for (let i = 0; i < this.maps.length; i++) {
-      this.maps[i].display(
-        this.displayed_position.lon,
-        this.displayed_position.lat,
-        scale_factor,
-        this.adjusted_cos_direction,
-        this.adjusted_sin_direction
-      );
+      // start_profiling();
+      this.display_direction();
+      this.display_stats();
+      // end_profiling("direction and stats display");
+    } else {
+      let current_position = 0;
+      if (this.current_segment !== null) {
+        current_position =
+          this.remaining_distances[0] -
+          (this.remaining_distances[this.current_segment + 1] +
+            this.projected_point.distance(
+              this.path.point(this.current_segment + 1)
+            ));
+      }
+      if (this.screen == HEIGHTS_FULL) {
+        this.display_heights(0, current_position, this.remaining_distances[0]);
+      } else {
+        // only display 2500m
+        let start;
+        if (go_backwards) {
+          start = Math.max(0, current_position - 2000);
+        } else {
+          start = Math.max(0, current_position - 500);
+        }
+        let length = Math.min(2500, this.remaining_distances[0] - start);
+        this.display_heights(start, current_position, length);
+      }
     }
-    // end_profiling("map");
-    if (this.interests !== null) {
-      this.interests.display(
-        this.displayed_position.lon,
-        this.displayed_position.lat,
-        scale_factor,
-        this.adjusted_cos_direction,
-        this.adjusted_sin_direction
-      );
-    }
-    if (this.position !== null) {
-      this.display_path();
-    }
-
-    this.display_direction();
-    this.display_stats();
     Bangle.drawWidgets();
+    g.flip();
     displaying = false;
+  }
+  display_heights(display_start, current_position, displayed_length) {
+    let path_length = this.remaining_distances[0];
+    let widgets_height = 24;
+    let graph_width = g.getWidth();
+    let graph_height = g.getHeight() - 20 - widgets_height;
+
+    let distance_per_pixel = displayed_length / graph_width;
+
+    let start_point_index = 0;
+    let end_point_index = this.path.len - 1;
+    for (let i = 0; i < this.path.len; i++) {
+      let point_distance = path_length - this.remaining_distances[i];
+      if (point_distance <= display_start) {
+        start_point_index = i;
+      }
+      if (point_distance >= display_start + displayed_length) {
+        end_point_index = i;
+        break;
+      }
+    }
+    end_point_index = Math.min(end_point_index + 1, this.path.len - 1);
+    let max_height = Number.NEGATIVE_INFINITY;
+    let min_height = Number.POSITIVE_INFINITY;
+    for (let i = start_point_index; i <= end_point_index; i++) {
+      let height = this.heights[i];
+      max_height = Math.max(max_height, height);
+      min_height = Math.min(min_height, height);
+    }
+    // we'll set the displayed height to a minimum value of 100m
+    // if we don't, then we'll see too much noise
+    if (max_height - min_height < 100) {
+      min_height = min_height - 10;
+      max_height = min_height + 110;
+    }
+
+    let displayed_height = max_height - min_height;
+    let height_per_pixel = displayed_height / graph_height;
+    // g.setColor(0, 0, 0).drawRect(0, widgets_height, graph_width, graph_height + widgets_height);
+
+    let previous_x = null;
+    let previous_y = null;
+    let previous_height = null;
+    let previous_distance = null;
+    let current_x;
+    let current_y;
+    for (let i = start_point_index; i < end_point_index; i++) {
+      let point_distance = path_length - this.remaining_distances[i];
+      let height = this.heights[i];
+      let x = Math.round((point_distance - display_start) / distance_per_pixel);
+      if (go_backwards) {
+        x = graph_width - x;
+      }
+      let y =
+        widgets_height +
+        graph_height -
+        Math.round((height - min_height) / height_per_pixel);
+      if (x != previous_x) {
+        if (previous_x !== null) {
+          let steepness =
+            (height - previous_height) / (point_distance - previous_distance);
+          if (go_backwards) {
+            steepness *= -1;
+          }
+          let color;
+          if (steepness > 0.15) {
+            color = "#ff0000";
+          } else if (steepness > 0.8) {
+            color = "#ff8000";
+          } else if (steepness > 0.03) {
+            color = "#ffff00";
+          } else if (steepness > -0.03) {
+            color = "#00ff00";
+          } else if (steepness > -0.08) {
+            color = "#00aa44";
+          } else if (steepness > -0.015) {
+            color = "#0044aa";
+          } else {
+            color = "#0000ff";
+          }
+          g.setColor(color);
+          g.fillPoly([
+            previous_x,
+            previous_y,
+            x,
+            y,
+            x,
+            widgets_height + graph_height,
+            previous_x,
+            widgets_height + graph_height,
+          ]);
+          if (
+            current_position >= previous_distance &&
+            current_position < point_distance
+          ) {
+            let current_height =
+              previous_height +
+              ((current_position - previous_distance) /
+                (point_distance - previous_distance)) *
+                (height - previous_height);
+            current_x = Math.round(
+              (current_position - display_start) / distance_per_pixel
+            );
+            if (go_backwards) {
+              current_x = graph_width - current_x;
+            }
+            current_y =
+              widgets_height +
+              graph_height -
+              Math.round((current_height - min_height) / height_per_pixel);
+          }
+        }
+        previous_distance = point_distance;
+        previous_height = height;
+        previous_x = x;
+        previous_y = y;
+      }
+    }
+    if (this.on_path) {
+      g.setColor(0, 0, 0);
+    } else {
+      g.setColor(1, 0, 1);
+    }
+    g.fillCircle(current_x, current_y, 5);
+
+    // display min dist/max dist and min height/max height
+    g.setColor(g.theme.fg);
+    g.setFont("6x8:2");
+    g.setFontAlign(-1, 1, 0).drawString(
+      Math.ceil(display_start / 100) / 10,
+      0,
+      g.getHeight()
+    );
+
+    g.setFontAlign(1, 1, 0).drawString(
+      Math.ceil((display_start + displayed_length) / 100) / 10,
+      g.getWidth(),
+      g.getHeight()
+    );
+
+    g.setFontAlign(1, 1, 0).drawString(
+      min_height,
+      g.getWidth(),
+      widgets_height + graph_height
+    );
+    g.setFontAlign(1, -1, 0).drawString(
+      max_height,
+      g.getWidth(),
+      widgets_height
+    );
   }
   display_stats() {
     let now = new Date();
@@ -950,20 +1000,18 @@ class Status {
     if (this.old_times.length > 0) {
       let point_time = this.old_times[this.old_times.length - 1];
       let done_in = point_time - this.starting_time;
-      approximate_speed = Math.round(
-        (this.advanced_distance * 3.6) / done_in
-      );
+      approximate_speed = Math.round((this.advanced_distance * 3.6) / done_in);
       let approximate_instant_speed = Math.round(this.instant_speed * 3.6);
       g.setFont("6x8:2")
         .setFontAlign(-1, -1, 0)
+        .drawString("" + approximate_speed + "km/h", 0, g.getHeight() - 15);
+
+      g.setFont("6x8:3")
+        .setFontAlign(1, -1, 0)
         .drawString(
-          "" +
-            approximate_speed +
-            "km/h (in." +
-            approximate_instant_speed +
-            ")",
-          0,
-          g.getHeight() - 15
+          "" + approximate_instant_speed,
+          g.getWidth(),
+          g.getHeight() - 22
         );
     }
 
@@ -1012,11 +1060,6 @@ class Status {
           .drawString("turn", g.getWidth() - 50, 30);
       }
     }
-    if (!this.on_path) {
-      g.setColor(1.0, 0.0, 0.0)
-        .setFont("6x15")
-        .drawString("lost", g.getWidth() - 55, 35);
-    }
   }
   display_path() {
     // don't display all segments, only those neighbouring current segment
@@ -1033,9 +1076,6 @@ class Status {
     let half_width = width / 2;
     let half_height = height / 2 + Y_OFFSET;
     let scale_factor = this.scale_factor;
-    if (!zoomed) {
-      scale_factor /= 2;
-    }
 
     if (this.path !== null) {
       // compute coordinate for projection on path
@@ -1065,7 +1105,7 @@ class Status {
         let rotated_y = tx * sin + ty * cos;
         let x = half_width - Math.round(rotated_x); // x is inverted
         let y = half_height + Math.round(rotated_y);
-        g.setColor(g.theme.fgH).drawLine(half_width, half_height, x, y);
+        g.setColor(1, 0, 1).drawLine(half_width, half_height, x, y);
       }
 
       // display current-segment's projection
@@ -1074,14 +1114,26 @@ class Status {
     }
 
     // now display ourselves
-    g.setColor(0, 0, 0);
+    if (this.on_path) {
+      g.setColor(0, 0, 0);
+    } else {
+      g.setColor(1, 0, 1);
+    }
     g.fillCircle(half_width, half_height, 5);
   }
 }
 
 function load_gps(filename) {
   // let's display splash screen while loading file
+
+  let splashscreen = require("heatshrink").decompress(
+    atob(
+      "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"
+    )
+  );
+
   g.clear();
+
   g.drawImage(splashscreen, 0, 0);
   g.setFont("6x8:2")
     .setFontAlign(-1, -1, 0)
@@ -1094,6 +1146,7 @@ function load_gps(filename) {
   let offset = 0;
 
   let path = null;
+  let heights = null;
   let maps = [];
   let interests = null;
   while (offset < file_size) {
@@ -1116,6 +1169,11 @@ function load_gps(filename) {
       let res = new Interests(buffer, offset);
       interests = res[0];
       offset = res[1];
+    } else if (block_type == 4) {
+      console.log("loading heights");
+      let heights_number = path.points.length / 2;
+      heights = Int16Array(buffer, offset, heights_number);
+      offset += 2 * heights_number;
     } else {
       console.log("todo : block type", block_type);
     }
@@ -1127,17 +1185,15 @@ function load_gps(filename) {
     let msg = "invalid file\nsize " + file_size + "\ninstead of" + offset;
     E.showAlert(msg).then(function () {
       E.showAlert();
-      start_gipy(path, maps, interests);
+      start_gipy(path, maps, interests, heights);
     });
   } else {
-    start_gipy(path, maps, interests);
+    start_gipy(path, maps, interests, heights);
   }
 }
 
 class Path {
   constructor(buffer, offset) {
-    // let p = Uint16Array(buffer, offset, 1);
-    // console.log(p);
     let points_number = Uint16Array(buffer, offset, 1)[0];
     offset += 2;
 
@@ -1168,7 +1224,7 @@ class Path {
   }
 
   // return index of segment which is nearest from point.
-  // we need a direction because we need there is an ambiguity
+  // we need a direction because there is an ambiguity
   // for overlapping segments which are taken once to go and once to come back.
   // (in the other direction).
   nearest_segment(point, start, end, cos_direction, sin_direction) {
@@ -1185,7 +1241,7 @@ class Path {
 
       let dot =
         cos_direction * (p2.lon - p1.lon) + sin_direction * (p2.lat - p1.lat);
-      let orientation = +(dot < 0); // index 0 is good orientation
+      let orientation = +(dot < 0); // index 0 is good orientation (if you go forward)
       if (distance <= mins[orientation]) {
         mins[orientation] = distance;
         indices[orientation] = i - 1;
@@ -1194,12 +1250,13 @@ class Path {
       p1 = p2;
     }
 
-    // by default correct orientation (0) wins
+    // by default correct orientation (0 forward, 1 backward) wins
     // but if other one is really closer, return other one
-    if (mins[1] < mins[0] / 100.0) {
-      return [1, indices[1]];
+    let good_orientation = go_backwards ? 1 : 0;
+    if (mins[1 - good_orientation] < mins[good_orientation] / 100.0) {
+      return indices[1 - good_orientation];
     } else {
-      return [0, indices[0]];
+      return indices[good_orientation];
     }
   }
   get len() {
@@ -1239,9 +1296,9 @@ class Point {
   times(scalar) {
     return new Point(this.lon * scalar, this.lat * scalar);
   }
-  dot(other_point) {
-    return this.lon * other_point.lon + this.lat * other_point.lat;
-  }
+  // dot(other_point) {
+  //     return this.lon * other_point.lon + this.lat * other_point.lat;
+  // }
   distance(other_point) {
     //see https://www.movable-type.co.uk/scripts/latlong.html
     const R = 6371e3; // metres
@@ -1299,47 +1356,12 @@ class Point {
 }
 
 let fake_gps_point = 0;
-function simulate_gps(status) {
-  if (status.path === null) {
-    let map = status.maps[0];
-    let p1 = new Point(map.start_coordinates[0], map.start_coordinates[1]);
-    let p2 = new Point(
-      map.start_coordinates[0] + map.side * map.grid_size[0],
-      map.start_coordinates[1] + map.side * map.grid_size[1]
-    );
-    let pos = p1.times(1 - fake_gps_point).plus(p2.times(fake_gps_point));
-    if (fake_gps_point < 1) {
-      fake_gps_point += 0.01;
-    }
-    status.update_position(pos, null, null);
-  } else {
-    if (fake_gps_point > status.path.len - 1 || fake_gps_point < 0) {
-      return;
-    }
-    let point_index = Math.floor(fake_gps_point);
-    if (point_index >= status.path.len / 2 - 1) {
-      return;
-    }
-    let p1 = status.path.point(2 * point_index); // use these to approximately follow path
-    let p2 = status.path.point(2 * (point_index + 1));
-    //let p1 = status.path.point(point_index); // use these to strictly follow path
-    //let p2 = status.path.point(point_index + 1);
-
-    let alpha = fake_gps_point - point_index;
-    let pos = p1.times(1 - alpha).plus(p2.times(alpha));
-
-    if (go_backwards) {
-      fake_gps_point -= 0.05; // advance simulation
-    } else {
-      fake_gps_point += 0.05; // advance simulation
-    }
-    status.update_position(pos, null, null);
-  }
-}
 
 function drawMenu() {
   const menu = {
-    "": { title: "choose trace" },
+    "": {
+      title: "choose trace",
+    },
   };
   var files = s.list(".gps");
   for (var i = 0; i < files.length; ++i) {
@@ -1358,9 +1380,65 @@ function start(fn) {
   load_gps(fn);
 }
 
-function start_gipy(path, maps, interests) {
+function start_gipy(path, maps, interests, heights) {
   console.log("starting");
-  status = new Status(path, maps, interests);
+
+  if (!simulated && settings.disable_bluetooth) {
+    NRF.sleep(); // disable bluetooth completely
+  }
+
+  status = new Status(path, maps, interests, heights);
+
+  setWatch(
+    function () {
+      status.activate();
+      if (in_menu) {
+        return;
+      }
+      in_menu = true;
+      const menu = {
+        "": {
+          title: "choose action",
+        },
+        "Go Backward": {
+          value: go_backwards,
+          format: (v) => (v ? "On" : "Off"),
+          onchange: (v) => {
+            go_backwards = v;
+          },
+        },
+        Zoom: {
+          value: status.zoomed_in,
+          format: (v) => (v ? "In" : "Out"),
+          onchange: (v) => {
+            status.zoomed_in = v;
+            status.reset_images_cache();
+          },
+        },
+        /*LANG*/
+        powersaving: {
+          value: powersaving,
+          onchange: (v) => {
+            powersaving = v;
+          },
+        },
+        "back to map": function () {
+          in_menu = false;
+          E.showMenu();
+          g.clear();
+          g.flip();
+          if (status !== null) {
+            status.display();
+          }
+        },
+      };
+      E.showMenu(menu);
+    },
+    BTN1,
+    {
+      repeat: true,
+    }
+  );
 
   if (status.path !== null) {
     let start = status.path.point(0);
@@ -1369,13 +1447,29 @@ function start_gipy(path, maps, interests) {
     let first_map = maps[0];
     status.displayed_position = new Point(
       first_map.start_coordinates[0] +
-      (first_map.side * first_map.grid_size[0]) / 2,
+        (first_map.side * first_map.grid_size[0]) / 2,
       first_map.start_coordinates[1] +
-      (first_map.side * first_map.grid_size[1]) / 2);
+        (first_map.side * first_map.grid_size[1]) / 2
+    );
   }
   status.display();
 
+  Bangle.on("touch", () => {
+    let active = status.active;
+    status.activate();
+    if (in_menu) {
+      return;
+    }
+    if (active && status.heights !== null) {
+      g.clear();
+      g.flip();
+      status.screen = (status.screen + 1) % 3;
+      status.display();
+    }
+  });
+
   Bangle.on("stroke", (o) => {
+    status.activate();
     if (in_menu) {
       return;
     }
@@ -1391,19 +1485,60 @@ function start_gipy(path, maps, interests) {
     let s = status.adjusted_sin_direction;
     let rotated_x = xdiff * c - ydiff * s;
     let rotated_y = xdiff * s + ydiff * c;
-    status.displayed_x += rotated_x / ((status.scale_factor * 4) / 3);
-    status.displayed_y -= rotated_y / ((status.scale_factor * 4) / 3);
+    status.displayed_position.lon += (1.3 * rotated_x) / status.scale_factor;
+    status.displayed_position.lat -= (1.3 * rotated_y) / status.scale_factor;
     status.display();
   });
 
   if (simulated) {
-    status.starting_time = getTime();
-    // let's keep the screen on in simulations
-    Bangle.setLCDTimeout(0);
-    Bangle.setLCDPower(1);
-    setInterval(simulate_gps, 500, status);
+    // status.starting_time = getTime();
+    // // let's keep the screen on in simulations
+    // Bangle.setLCDTimeout(0);
+    // Bangle.setLCDPower(1);
+    // Bangle.loadWidgets(); // i don't know why i cannot load them at start : they would display on splash screen
+
+    // function simulate_gps(status) {
+    //   if (status.path === null) {
+    //     let map = status.maps[0];
+    //     let p1 = new Point(map.start_coordinates[0], map.start_coordinates[1]);
+    //     let p2 = new Point(
+    //       map.start_coordinates[0] + map.side * map.grid_size[0],
+    //       map.start_coordinates[1] + map.side * map.grid_size[1]
+    //     );
+    //     let pos = p1.times(1 - fake_gps_point).plus(p2.times(fake_gps_point));
+    //     if (fake_gps_point < 1) {
+    //       fake_gps_point += 0.05;
+    //     }
+    //     status.update_position(pos);
+    //   } else {
+    //     if (fake_gps_point > status.path.len - 1 || fake_gps_point < 0) {
+    //       return;
+    //     }
+    //     let point_index = Math.floor(fake_gps_point);
+    //     if (point_index >= status.path.len / 2 - 1) {
+    //       return;
+    //     }
+    //     let p1 = status.path.point(2 * point_index); // use these to approximately follow path
+    //     let p2 = status.path.point(2 * (point_index + 1));
+    //     //let p1 = status.path.point(point_index); // use these to strictly follow path
+    //     //let p2 = status.path.point(point_index + 1);
+
+    //     let alpha = fake_gps_point - point_index;
+    //     let pos = p1.times(1 - alpha).plus(p2.times(alpha));
+
+    //     if (go_backwards) {
+    //       fake_gps_point -= 0.2; // advance simulation
+    //     } else {
+    //       fake_gps_point += 0.2; // advance simulation
+    //     }
+    //     console.log(fake_gps_point);
+    //     status.update_position(pos);
+    //   }
+    // }
+
+    // setInterval(simulate_gps, 500, status);
   } else {
-    Bangle.setLocked(false);
+    status.activate();
 
     let frame = 0;
     let set_coordinates = function (data) {
@@ -1416,9 +1551,9 @@ function start_gipy(path, maps, interests) {
       if (valid_coordinates) {
         if (status.starting_time === null) {
           status.starting_time = getTime();
-          Bangle.loadWidgets(); // i don't know why i cannot load them at start : they would display on splash screen
+          Bangle.loadWidgets(); // load them even in simulation to eat mem
         }
-        status.update_position(new Point(data.lon, data.lat), null, data.time);
+        status.update_position(new Point(data.lon, data.lat));
       }
       let gps_status_color;
       if (frame % 2 == 0 || valid_coordinates) {
@@ -1435,52 +1570,8 @@ function start_gipy(path, maps, interests) {
 
     Bangle.setGPSPower(true, "gipy");
     Bangle.on("GPS", set_coordinates);
-    Bangle.on("lock", function (on) {
-      if (!on) {
-        Bangle.setGPSPower(true, "gipy"); // activate gps when unlocking
-      }
-    });
   }
 }
-
-setWatch(
-  function () {
-    if (in_menu) {
-      return;
-    }
-    in_menu = true;
-    const menu = {
-      "": { title: "choose action" },
-      "Go Backward": {
-        value: go_backwards,
-        format: (v) => (v ? "On" : "Off"),
-        onchange: (v) => {
-          go_backwards = v;
-        },
-      },
-      Zoom: {
-        value: zoomed,
-        format: (v) => (v ? "In" : "Out"),
-        onchange: (v) => {
-          status.invalidate_caches();
-          zoomed = v;
-        },
-      },
-      "back to map": function () {
-        in_menu = false;
-        E.showMenu();
-        g.clear();
-        g.flip();
-        if (status !== null) {
-            status.display();
-        }
-      },
-    };
-    E.showMenu(menu);
-  },
-  BTN1,
-  { repeat: true }
-);
 
 let files = s.list(".gps");
 if (files.length <= 1) {

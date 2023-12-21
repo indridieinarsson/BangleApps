@@ -107,7 +107,7 @@ exports.dismiss = function(msg) {
 };
 
 /**
- * Emit a "type=openGUI" event, to open GUI app
+ * Open the Messages GUI app
  *
  * @param {object} [msg={}] Message the app should show
  */
@@ -204,18 +204,20 @@ exports.buzz = function(msgSrc) {
   if ((require("Storage").readJSON("setting.json", 1) || {}).quiet) return Promise.resolve(); // never buzz during Quiet Mode
   const msgSettings = require("Storage").readJSON("messages.settings.json", true) || {};
   let pattern;
+  let repeat;
   if (msgSrc && msgSrc.toLowerCase()==="phone") {
     // special vibration pattern for incoming calls
     pattern = msgSettings.vibrateCalls;
+    repeat = msgSettings.repeatCalls;
   } else {
     pattern = msgSettings.vibrate;
+    repeat = msgSettings.repeat;
   }
   if (pattern===undefined) { pattern = ":"; } // pattern may be "", so we can't use || ":" here
   if (!pattern) return Promise.resolve();
 
-  let repeat = msgSettings.repeat;
   if (repeat===undefined) repeat = 4; // repeat may be zero
-  if (repeat) 
+  if (repeat)
   {
     exports.buzzInterval = setInterval(() => require("buzz").pattern(pattern), repeat*1000);
     let vibrateTimeout = msgSettings.vibrateTimeout;
