@@ -1,7 +1,7 @@
 { "id": "ieclock",
   "name": "Analog Clock with barometer info",
   "shortName":"IE Clock",
-  "version":"0.38",
+  "version":"0.39",
   "description": "a simple analog clock with tidal information",
   "icon": "app-icon.png",
   "type": "clock",
