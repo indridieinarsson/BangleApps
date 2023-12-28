@@ -106,4 +106,4 @@ Clockwork.windUp({
         r:sunrise.whichevent('sunrise'),
 	b:require('https://raw.githubusercontent.com/rozek/banglejs-2-date-complication/main/Complication.js'),
     }
-}, {'Foreground':'Theme', 'Background':'Theme'});
+}, {'Foreground':'Theme', 'Background':'Theme', 'ArmsColor': 'magenta'});
