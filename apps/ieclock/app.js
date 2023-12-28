@@ -98,7 +98,7 @@ let Clockwork = require('https://raw.githubusercontent.com/indridieinarsson/espr
 Clockwork.windUp({
     face:require('https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/ClockFace.js'),
     size:ClockSize,
-    hands: require('https://raw.githubusercontent.com/rozek/banglejs-2-hollow-clock-hands/main/ClockHands.js'),
+    hands: require('https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/ClockHands.js'),
     complications: {
         // r:sunrise.whichevent('sunset'),
 	t:require('https://raw.githubusercontent.com/rozek/banglejs-2-moon-phase-complication/main/Complication.js'),
