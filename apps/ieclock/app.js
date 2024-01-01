@@ -50,12 +50,11 @@ sunrise.draw = function(x, y, Radius, Settings) {
     let largeComplication = (x === halfScreenWidth);
     auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/24hAuxDial.js");
     let rmult = (largeComplication?1.7:1.35);
-	let h1 = tidesrv.sunrise.getHours();
-	let m1 = tidesrv.sunrise.getMinutes();
-	let h2 = tidesrv.sunset.getHours();
-	let m2 = tidesrv.sunset.getMinutes();
+    let h1 = tidesrv.sunrise.getHours();
+    let m1 = tidesrv.sunrise.getMinutes();
+    let h2 = tidesrv.sunset.getHours();
+    let m2 = tidesrv.sunset.getMinutes();
     auxdial.draw(Settings, x, y, Math.round(Radius*rmult), h1 ,m1 , h2, m2);
-
     // let Text = this.compactTime(sunRise);
     // g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
     // g.setFont('Vector', 16);
@@ -91,26 +90,26 @@ tide.draw = function(x, y, Radius, Settings) {
     }
     let h1 = tidesrv.tides.time.getHours();
     let m1 = tidesrv.tides.time.getMinutes();
-	let tlast = Date(tidesrv.tides.timelast);
-	let h2 = tlast.getHours();
-	let m2 = tlast.getMinutes();
+    let tlast = Date(tidesrv.tides.timelast);
+    let h2 = tlast.getHours();
+    let m2 = tlast.getMinutes();
 	
     if (tidesrv.tides.high) {
-	    auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h2 ,m2 , h1, m1);
+        auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h2 ,m2 , h1, m1);
     }else {
-	    auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h1 ,m1 , h2, m2);
+        auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h1 ,m1 , h2, m2);
     }
     // if (largeComplication){
-	let th = tidesrv.tides.height;
-        let t1=th.toFixed(0);
-        let t2=((Math.abs(th)%1)*10).toFixed();
-        g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
-        g.setFont('Vector',16);
-        g.setFontAlign(1,1);
-        g.drawString(t1,x+8,y+8);
-        g.setFont('Vector',12);
-        g.setFontAlign(0,0);
-        g.drawString(t2,x+8,y+8);
+    let th = tidesrv.tides.height;
+    let t1=th.toFixed(0);
+    let t2=((Math.abs(th)%1)*10).toFixed();
+    g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
+    g.setFont('Vector',16);
+    g.setFontAlign(1,1);
+    g.drawString(t1,x+8,y+8);
+    g.setFont('Vector',12);
+    g.setFontAlign(0,0);
+    g.drawString(t2,x+8,y+8);
     // }
     // let Text = this.compactTime(ieclock.tides.time);
     // if (largeComplication){
