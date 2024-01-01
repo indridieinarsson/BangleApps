@@ -1,31 +1,7 @@
-var SunCalc = require("https://raw.githubusercontent.com/mourner/suncalc/master/suncalc.js");
-const LOCATION_FILE = "mylocation.json";
-var location;
-var sunRise;
-var sunSet;
-//ble = (function () {
-// 1/4 : String.fromCharCode(188)
-// 2/4 : String.fromCharCode(189)
-// 3/4 : String.fromCharCode(190)
-//
 function log_debug(o) {
   //print(o);
 }
 
-function loadLocation() {
-  location = require("Storage").readJSON(LOCATION_FILE,1)||{};
-  location.lat = location.lat||51.5072;
-  location.lon = location.lon||0.1276;
-  location.location = location.location||"London";
-}
-
-function updateSunRiseSunSet(now, lat, lon, line){
-  // get today's sunlight times for lat/lon
-  let times = SunCalc.getTimes(new Date(), lat, lon);
-  // format sunrise time from the Date object
-  sunRise = times.sunrise;
-  sunSet = times.sunset;
-}
 
 let ClockSize = require('https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/ClockSize.js');
 
@@ -44,16 +20,15 @@ sunrise.compactTime = function(t) {
 };
 
 sunrise.draw = function(x, y, Radius, Settings) {
-    loadLocation();
     //updateSunRiseSunSet(new Date(), location.lat, location.lon);
     let halfScreenWidth   = g.getWidth() / 2;
     let largeComplication = (x === halfScreenWidth);
     auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/24hAuxDial.js");
     let rmult = (largeComplication?1.7:1.35);
-    let h1 = tidesrv.sunrise.getHours();
-    let m1 = tidesrv.sunrise.getMinutes();
-    let h2 = tidesrv.sunset.getHours();
-    let m2 = tidesrv.sunset.getMinutes();
+    let h1 = tidesrv.times.dawn.getHours();
+    let m1 = tidesrv.times.dawn.getMinutes();
+    let h2 = tidesrv.times.dusk.getHours();
+    let m2 = tidesrv.times.dusk.getMinutes();
     auxdial.draw(Settings, x, y, Math.round(Radius*rmult), h1 ,m1 , h2, m2);
     // let Text = this.compactTime(sunRise);
     // g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
@@ -76,15 +51,15 @@ tide.draw = function(x, y, Radius, Settings) {
     let largeComplication = (x === halfScreenWidth);
     auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/24hAuxDial.js");
     let rmult = (largeComplication?1.7:1.35);
-    if (typeof ieclock == 'undefined')
+    if (typeof tidesrv == 'undefined')
     {
         return;
     }
-    if (typeof ieclock.tides == 'undefined')
+    if (typeof tidesrv.tides == 'undefined')
     {
         return;
     }
-    if (typeof ieclock.tides.height == 'undefined' || typeof ieclock.tides.time == 'undefined' )
+    if (typeof tidesrv.tides.height == 'undefined' || typeof tidesrv.tides.time == 'undefined' )
     {
         return;
     }
@@ -120,32 +95,6 @@ tide.draw = function(x, y, Radius, Settings) {
     // g.setFontAlign(0,0);
     // g.drawString(Text, x, y);
 };
-
-// tideheight = {};
-// tideheight.draw = function() {
-//     g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
-//     g.setFont('Vector', 18);
-//     g.setFontAlign(0,0);
-//     Text = ''+ieclock.tides.height+'m';
-//     g.drawString(Text, x,y);
-// }
-
-function drawEvent(ev, x, y, Radius, Settings) {
-    let halfScreenWidth   = g.getWidth() / 2;
-    let largeComplication = (x === halfScreenWidth);
-    let rmult = (largeComplication?1.65:1.35);
-    auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/24hAuxDial.js");
-    g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
-    let h = ieclock[ev].getHours();
-    let m = ieclock[ev].getMinutes();
-    auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h ,m , true);
-}
-
-// sunrise.draw = drawEvent.bind(this, 'sunrise');
-//
-// sunrise.whichevent = function whichevent (ev) {
-//     return { draw:drawEvent.bind(this,ev) };
-// };
 
 let Clockwork = require('https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/Clockwork.js');
 
