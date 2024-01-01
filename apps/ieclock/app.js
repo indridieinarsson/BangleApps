@@ -61,7 +61,7 @@ sunrise.draw = function(x, y, Radius, Settings) {
     // g.setFont('Vector', 16);
     // g.setFontAlign(0,0);
     // g.drawString(Text, x, y);
-}
+};
 
 tide = {};
 
@@ -151,7 +151,7 @@ Clockwork.windUp({
 	t:require('https://raw.githubusercontent.com/rozek/banglejs-2-moon-phase-complication/main/Complication.js'),
         l:tide,
         // r:sunrise.whichevent('sunrise'),
-        r:sunrise
+        r:sunrise,
 	b:require('https://raw.githubusercontent.com/rozek/banglejs-2-date-complication/main/Complication.js'),
     }
 }, {'Foreground':'Theme', 'Background':'Theme', 'ArmsColor':'#00FFFF'});
