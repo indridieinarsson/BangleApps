@@ -1,3 +1,8 @@
+var SunCalc = require("https://raw.githubusercontent.com/mourner/suncalc/master/suncalc.js");
+const LOCATION_FILE = "mylocation.json";
+var location;
+var sunRise;
+var sunSet;
 //ble = (function () {
 // 1/4 : String.fromCharCode(188)
 // 2/4 : String.fromCharCode(189)
@@ -7,14 +12,56 @@ function log_debug(o) {
   //print(o);
 }
 
+function loadLocation() {
+  location = require("Storage").readJSON(LOCATION_FILE,1)||{};
+  location.lat = location.lat||51.5072;
+  location.lon = location.lon||0.1276;
+  location.location = location.location||"London";
+}
+
+function updateSunRiseSunSet(now, lat, lon, line){
+  // get today's sunlight times for lat/lon
+  let times = SunCalc.getTimes(new Date(), lat, lon);
+  // format sunrise time from the Date object
+  sunRise = times.sunrise;
+  sunSet = times.sunset;
+}
+
 let ClockSize = require('https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/ClockSize.js');
 
+var timeCompact={};
+timeCompact.quarters = [0, String.fromCharCode(188), String.fromCharCode(189), String.fromCharCode(190), 0];
+timeCompact.compactTime = function(t) {
+    return ''+t.getHours()+this.quarters[Math.round(t.getMinutes()/15)];
+};
+
 sunrise = {};
+
 sunrise.quarters = [0, String.fromCharCode(188), String.fromCharCode(189), String.fromCharCode(190), 0];
 
 sunrise.compactTime = function(t) {
     return ''+t.getHours()+this.quarters[Math.round(t.getMinutes()/15)];
 };
+
+sunrise.draw = function(x, y, Radius, Settings) {
+    loadLocation();
+    updateSunRiseSunSet(new Date(), location.lat, location.lon);
+    let halfScreenWidth   = g.getWidth() / 2;
+    let largeComplication = (x === halfScreenWidth);
+    auxdial = require("https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/24hAuxDial.js");
+    let rmult = (largeComplication?1.7:1.35);
+	let h1 = sunRise.getHours();
+	let m1 = sunRise.getMinutes();
+	let h2 = sunSet.getHours();
+	let m2 = sunSet.getMinutes();
+    auxdial.draw(Settings, x, y, Math.round(Radius*rmult), h1 ,m1 , true);
+
+    // let Text = this.compactTime(sunRise);
+    // g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
+    // g.setFont('Vector', 16);
+    // g.setFontAlign(0,0);
+    // g.drawString(Text, x, y);
+}
 
 tide = {};
 
@@ -46,7 +93,7 @@ tide.draw = function(x, y, Radius, Settings) {
     let m = ieclock.tides.time.getMinutes();
     auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h ,m , true);
     // if (largeComplication){
-        let th = ieclock.tides.height;
+	let th = ieclock.tides.height;
         let t1=th.toFixed(0);
         let t2=((Math.abs(th)%1)*10).toFixed();
         g.setColor(Settings.Foreground === 'Theme' ? g.theme.fg : Settings.Foreground || '#000000');
@@ -87,11 +134,11 @@ function drawEvent(ev, x, y, Radius, Settings) {
     auxdial.draw(Settings, x, y, Math.round(Radius*rmult),h ,m , true);
 }
 
-sunrise.draw = drawEvent.bind(this, 'sunrise');
-
-sunrise.whichevent = function whichevent (ev) {
-    return { draw:drawEvent.bind(this,ev) };
-};
+// sunrise.draw = drawEvent.bind(this, 'sunrise');
+//
+// sunrise.whichevent = function whichevent (ev) {
+//     return { draw:drawEvent.bind(this,ev) };
+// };
 
 let Clockwork = require('https://raw.githubusercontent.com/indridieinarsson/espruino_sandbox/master/Clockwork.js');
 
@@ -103,7 +150,8 @@ Clockwork.windUp({
         // r:sunrise.whichevent('sunset'),
 	t:require('https://raw.githubusercontent.com/rozek/banglejs-2-moon-phase-complication/main/Complication.js'),
         l:tide,
-        r:sunrise.whichevent('sunrise'),
+        // r:sunrise.whichevent('sunrise'),
+        r:sunrise
 	b:require('https://raw.githubusercontent.com/rozek/banglejs-2-date-complication/main/Complication.js'),
     }
-}, {'Foreground':'Theme', 'Background':'Theme', 'ArmsColor':'#FF00FF'});
+}, {'Foreground':'Theme', 'Background':'Theme', 'ArmsColor':'#00FFFF'});
