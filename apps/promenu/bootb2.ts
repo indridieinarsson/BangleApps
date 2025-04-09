@@ -1,8 +1,17 @@
 type ActualMenuItem = Exclude<Menu["..."], MenuOptions | undefined>;
 
+type PromenuSettings = {
+  naturalScroll: boolean,
+  wrapAround: boolean,
+};
+
 const enum Consts {
   NAME_SCROLL_PAD = 5,
 }
+
+const S = (require("Storage").readJSON("promenu.settings.json", true) || {}) as PromenuSettings;
+S.naturalScroll ??= false;
+S.wrapAround ??= true;
 
 E.showMenu = (items?: Menu): MenuInstance => {
   const RectRnd = (x1: number, y1: number, x2: number, y2: number, r: number) => {
@@ -207,7 +216,11 @@ E.showMenu = (items?: Menu): MenuInstance => {
 
       } else {
         const lastSelected = selected;
-        selected = (selected + dir + /*keep +ve*/menuItems.length) % menuItems.length;
+        if (S.wrapAround) {
+          selected = (selected + dir + /*keep +ve*/menuItems.length) % menuItems.length;
+        } else {
+          selected = E.clip(selected + dir, 0, menuItems.length - 1);
+        }
         scroller.scroll = selected;
         l.draw(Math.min(lastSelected, selected), Math.max(lastSelected, selected));
       }
@@ -240,10 +253,11 @@ E.showMenu = (items?: Menu): MenuInstance => {
     remove: () => {
       if (nameScroller) clearInterval(nameScroller);
       Bangle.removeListener("swipe", onSwipe);
+      options.remove?.();
     },
   } as SetUIArg<"updown">,
   dir => {
-    if (dir) l.move(dir);
+    if (dir) l.move(S.naturalScroll ? -dir : dir);
     else l.select();
   });
 
